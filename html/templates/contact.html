@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us Form</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/contact.css">
+</head>
+<body>
+  <header>
+    <button class="back-button" onclick="window.location.replace('../Templates.html')">Back</button>
+    <div id="buttonsHeader">
+      <button> Undo</button>
+      <button>Redo</button>
+      <button> Preview</button>
+      <button>Share</button>
+    </div>
+  </header>
+
+  <main>
+    <form>
+      <div class="form-header">
+        <h1>Contact Us</h1>
+        <p>We'd love to hear from you</p>
+      </div>
+
+      <div id="questionBlock">
+        <div id="form-group">
+          <label>Your Name:</label>
+          <div id="icons">
+            <i class="fas fa-plus-circle" onclick="addNewElement(event)" style="font-size: 24px;"></i>
+            &nbsp;&nbsp;
+            <i class="fas fa-edit" style="font-size: 20px;" onclick="editElement()"></i>&nbsp;&nbsp;
+            <i class="fas fa-trash" style="font-size: 18px;" onclick="deleteElement()"></i>
+          </div>
+        </div>
+        <input type="text" id="fullName" placeholder="Enter your name">
+      </div>
+
+      <div id="questionBlock">
+        <div id="form-group">
+          <label>Email Address:</label>
+          <div id="icons">
+            <i class="fas fa-plus-circle" onclick="addNewElement(event)" style="font-size: 24px;"></i>
+            &nbsp;&nbsp;
+            <i class="fas fa-edit" style="font-size: 20px;" onclick="editElement()"></i>&nbsp;&nbsp;
+            <i class="fas fa-trash" style="font-size: 18px;" onclick="deleteElement()"></i>
+          </div>
+        </div>
+        <input type="email" id="email" placeholder="Enter your email">
+      </div>
+
+      <div id="questionBlock">
+        <div id="form-group">
+          <label>Phone Number:</label>
+          <div id="icons">
+            <i class="fas fa-plus-circle" onclick="addNewElement(event)" style="font-size: 24px;"></i>
+            &nbsp;&nbsp;
+            <i class="fas fa-edit" style="font-size: 20px;" onclick="editElement()"></i>&nbsp;&nbsp;
+            <i class="fas fa-trash" style="font-size: 18px;" onclick="deleteElement()"></i>
+          </div>
+        </div>
+        <input type="tel" id="phone" placeholder="Enter your phone number">
+      </div>
+
+      <div id="questionBlock">
+        <div id="form-group">
+          <label>Subject:</label>
+          <div id="icons">
+            <i class="fas fa-plus-circle" onclick="addNewElement(event)" style="font-size: 24px;"></i>
+            &nbsp;&nbsp;
+            <i class="fas fa-edit" style="font-size: 20px;" onclick="editElement()"></i>&nbsp;&nbsp;
+            <i class="fas fa-trash" style="font-size: 18px;" onclick="deleteElement()"></i>
+          </div>
+        </div>
+        <select>
+          <option value="">-- Select a subject --</option>
+          <option value="general">General Inquiry</option>
+          <option value="support">Support</option>
+          <option value="sales">Sales</option>
+          <option value="feedback">Feedback</option>
+        </select>
+      </div>
+
+      <div id="questionBlock">
+        <div id="form-group">
+          <label>Your Message:</label>
+          <div id="icons">
+            <i class="fas fa-plus-circle" onclick="addNewElement(event)" style="font-size: 24px;"></i>
+            &nbsp;&nbsp;
+            <i class="fas fa-edit" style="font-size: 20px;" onclick="editElement()"></i>&nbsp;&nbsp;
+            <i class="fas fa-trash" style="font-size: 18px;" onclick="deleteElement()"></i>
+          </div>
+        </div>
+        <textarea rows="4" cols="50" id="message" placeholder="Enter your message here..."></textarea>
+      </div>
+
+      <div id="questionBlock">
+        <div id="form-group">
+          <label>Preferred Contact Method:</label>
+          <div id="icons">
+            <i class="fas fa-plus-circle" onclick="addNewElement(event)" style="font-size: 24px;"></i>
+            &nbsp;&nbsp;
+            <i class="fas fa-edit" style="font-size: 20px;" onclick="editElement()"></i>&nbsp;&nbsp;
+            <i class="fas fa-trash" style="font-size: 18px;" onclick="deleteElement()"></i>
+          </div>
+        </div>
+        <div class="radio-group">
+          <label><input type="radio" name="contactMethod" value="email"> Email</label>
+          <label><input type="radio" name="contactMethod" value="phone"> Phone</label>
+          <label><input type="radio" name="contactMethod" value="either"> Either</label>
+        </div>
+      </div>
+
+      <div id="form-group" style="margin-top: 20px;">
+        <button type="submit">Submit</button>
+      </div>
+    </form>
+  </main>
+
+  <section id="addContent">
+    <div id="container">
+      <input type="text" placeholder="Question"
+        style="width: 50%; margin-left: 10px; border: 1px solid #ccc; padding: 8px;">&nbsp;&nbsp;&nbsp;&nbsp;
+      <i class="fa-solid fa-image" title="Upload Image as Question" onclick="uploadImage()" style="font-size: 30px; color: rgb(0, 60, 139);"></i>
+      <div id="custom-select">
+        <div id="selected">Select type of answer</div>
+        <ul id="options">
+          <li><i class="fa fa-pen"></i>&nbsp;&nbsp;&nbsp;Short Answer</li>
+          <li><i class="fa fa-align-left"></i>&nbsp;&nbsp;&nbsp; Paragraph</li>
+          <hr>
+          <li><i class="fa fa-dot-circle"></i> &nbsp;&nbsp;&nbsp;Multiple Choice</li>
+          <li><i class="fa fa-check-square"></i> &nbsp;&nbsp;&nbsp;Checkboxes</li>
+          <li><i class="fa fa-caret-down"></i>&nbsp;&nbsp;&nbsp; Dropdown</li>
+          <hr>
+          <li><i class="fa fa-upload"></i> &nbsp;&nbsp;&nbsp;File Upload</li>
+          <hr>
+          <li><i class="fa fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp; Date</li>
+          <li><i class="fa fa-clock"></i> &nbsp;&nbsp;&nbsp;Time</li>
+        </ul>
+      </div>
+    </div>
+  
+    <div id="inputContainer"></div>
+    <div id="content">
+      <ul id="actions">
+        <li><i class="fa fa-copy" onclick="copyText()"></i> </li>
+        <li><i class="fa fa-trash-alt" onclick="deleteText()"></i> </li>
+        <li>
+          <span class="toggle-switch">
+            <i class="fa fa-toggle-on" style="color: green;" id="toggleIcon"></i>
+          </span>Required
+        </li>
+        <li><i class="fas fa-save" title="save" onclick="save()"></i> </li>
+      </ul>
+    </div>
+  </section>
+
+  <script src="../../js/contact.js">
+   
+  </script>
+</body>
+</html>

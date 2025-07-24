@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/survey.css">
+</head>
+
+<body>
+  
+  <header>
+  <button style="position: absolute; top: 3%; right: 95%; color: rgb(0, 60, 139);
+  padding: 10px; border-radius: 5px; border: 2px solid rgb(0, 60, 139); font-size: 18px; cursor: pointer;"
+    onclick="window.location.replace('../Templates.html')">Back</button>
+  <div id="buttonsHeader">
+    <button onclick="undoAction()">Undo</button>
+    <button onclick="redoAction()">Redo</button>
+    <button onclick="previewForm()">Preview</button>
+     <button id="publishBtn">Publish</button>
+    <button onclick="shareForm()">Share</button>
+  </div>
+</header>
+  <main>
+  <form></form>
+
+  </main>
+  <section id="addContent">
+
+    <div id="container">
+      <input type="text" placeholder="Question"
+        style="width: 50%; border: none; border: 1px solid #ccc; margin-left: 15px;">&nbsp;&nbsp;&nbsp;&nbsp;
+      <div id="custom-select">
+        <div id="selected">Select type of answer</div>
+        <ul id="options">
+          <li><i class="fa fa-pen"></i>&nbsp;&nbsp;&nbsp;Short Answer</li>
+          <li><i class="fa fa-align-left"></i>&nbsp;&nbsp;&nbsp; Paragraph</li>
+          <hr>
+          <li><i class="fa fa-dot-circle"></i> &nbsp;&nbsp;&nbsp;Multiple Choice</li>
+          <li><i class="fa fa-check-square"></i> &nbsp;&nbsp;&nbsp;Checkboxes</li>
+          <li><i class="fa fa-caret-down"></i>&nbsp;&nbsp;&nbsp; Dropdown</li>
+          <hr>
+          <li><i class="fa fa-upload"></i> &nbsp;&nbsp;&nbsp;File Upload</li>
+          <hr>
+          <li><i class="fa fa-sliders-h"></i>&nbsp;&nbsp;&nbsp; Linear Scaling</li>
+          <li><i class="fa fa-star"></i> &nbsp;&nbsp;&nbsp;Rating</li>
+          <hr>
+          <li><i class="fa fa-calendar-alt"></i>&nbsp;&nbsp;&nbsp; Date</li>
+          <li><i class="fa fa-clock"></i> &nbsp;&nbsp;&nbsp;Time</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div id="inputContainer">
+      
+    </div>
+    <div id="content">
+      <ul id="actions">
+        <li><i class="fa fa-copy" onclick="copyText()"></i> </li>
+        <li><i class="fa fa-trash-alt" onclick="deleteText()"></i> </li>
+        <li>
+          <span class="toggle-switch">
+            <i class="fa fa-toggle-on" style="color: green;" id="toggleRequired"></i>
+          </span>Required
+        </li>
+        <li><i class="fas fa-save" title="save" onclick="save(event)"></i> </li>
+      </ul>
+    </div>
+    
+  </section>
+</body>
+<script src="../../js/survey.js">
+ 
+
+</script>
+
+</html>

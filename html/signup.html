@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/signup.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div id="signUpContainer">
+        <h1 style="text-align: center;">Sign Up</h1>
+        <h2 style="text-align: center;">Get Started with FormCraft</h2>
+        <label for="fullName">Enter Full Name</label><br>
+        <input type="text" id="fullName" placeholder="Enter Full Name"><br>
+        <label for="email">Email Address</label><br>
+        <input type="text" id="email" placeholder="Enter Email Address"><br>
+        <label for="password">Enter Password</label><br>
+        <input type="password" id="password" placeholder="Enter Password"><br>
+        <p>&#x1F4DD; Password must be strong</p>
+        <label for="confirmPassword">Confirm Password</label><br>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password"><br>
+        <input type="checkbox" id="rememberMe" value="Remember Me"><label for="rememberMe" id="remember">Accept Terms & Conditions</label> &nbsp;&nbsp;&nbsp;<br>
+        <button id="create" onclick="signUpValidation(event)">Create account</button>
+        <p style="font-size: 18px; text-align: center;">-------------- Already have an account ---------------</p>
+        <button id="create" onclick="window.location.replace('./signin.html')">Sign In</button>
+    </div>
+    <script src="../js/signup.js"></script>
+</body>
+</html>

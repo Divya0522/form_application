@@ -1,0 +1,346 @@
+body {
+    margin: 0;
+    z-index: -1;
+}
+
+header>div {
+    display: flex;
+}
+
+header {
+    margin-top: 10px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background-color: white;
+    padding: 10px;
+}
+
+#logoContainer {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin: 10px;
+}
+
+#logoContainer span {
+    font-size: 20px;
+    color: darkblue;
+    font-weight: bold;
+
+}
+
+#logoContainer span a {
+    text-decoration: none;
+}
+
+#logoContainer span a:link,#logoContainer span a:visited,#logoContainer span a:active {
+    color: darkblue;
+}
+
+
+#navBar {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    margin-left: 40%;
+
+}
+
+#navBar nav a {
+    text-decoration: none;
+    font-size: 20px;
+    padding: 15px 15px 3px 15px;
+    color: black;
+    position: relative;
+}
+
+#navBar nav a::after {
+    content: "";
+    position: absolute;
+    height: 2px;
+    background-color: darkblue;
+    left: 0;
+    bottom: 0;
+    transition: width 0.2s;
+
+}
+
+#navBar nav a:hover {
+    color: darkblue;
+}
+
+#navBar nav a:hover::after {
+    width: 100%;
+
+}
+
+#signup button {
+    border: none;
+    background-color: darkblue;
+    cursor: pointer;
+    padding: 13px;
+    font-size: 18px;
+    color: white;
+    border-radius: 5px;
+}
+
+#signin button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 18px;
+    border: 2px solid darkblue;
+    color: darkblue;
+    border-radius: 5px;
+
+}
+
+#signin button:hover {
+    background-color: navy;
+    color: white;
+}
+
+#signup button:hover {
+    background-color: navy;
+}
+
+
+#heroSection {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 10px 0 0 0;
+    gap: 27%;
+    height: 360px;
+    background: linear-gradient(to right, rgb(75, 75, 146), pink);
+}
+
+#hero1 {
+    text-align: center;
+    color: white;
+    padding: 10px;
+    margin-left: 15%;
+}
+
+#Features {
+    margin: 50px;
+    padding: 5px;
+    color: darkblue;
+}
+
+#features {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 45px;
+}
+
+#innerContainer {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    word-wrap: break-word;
+    width: 250px;
+    border: 2px solid white;
+    border-radius: 5px;
+    box-shadow: 0px 3px 0px 0px rgb(208, 207, 207);
+}
+
+
+#innerContainer:hover {
+    box-shadow: 0px 5px 5px 5px rgb(208, 207, 207);
+    transition: box-shadow 0.1s ease-in-out;
+}
+
+#Templates {
+    background: linear-gradient(to left, rgb(136, 136, 206), rgb(218, 141, 182));
+    padding: 20px;
+}
+
+#Templates div {
+    display: flex;
+    background: linear-gradient(to left, rgb(136, 136, 206), rgb(218, 141, 182));
+    padding: 20px;
+}
+
+#Templates div figure {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    color: darkblue;
+    border: 2px solid linear-gradient(to left, rgb(136, 136, 206), rgb(218, 141, 182));
+    box-shadow: 0px 3px 5px 0px rgb(127, 126, 126);
+    margin: 10;
+}
+
+#Templates div figure:hover {
+    box-shadow: 3px 3px 8px 5px rgb(127, 126, 126);
+}
+
+#browse {
+    text-align: center;
+    display: block;
+    margin: auto;
+    padding: 12px;
+    border: 2px solid darkblue;
+    border-radius: 5px;
+    color: white;
+    background-color: darkblue;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+#browse:hover {
+    text-decoration: underline white;
+}
+
+#how {
+    padding: 50px 20px;
+    text-align: center;
+    background-color: #f9f9f9;
+}
+
+#how h1 {
+    font-size: 30px;
+    color: darkblue;
+    margin-bottom: 30px;
+}
+
+.video-container {
+    max-width: 800px;
+    margin: 0 auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.video-container video {
+    width: 100%;
+    display: block;
+}
+
+.steps {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-top: 40px;
+}
+
+.step {
+    width: 22%;
+    min-width: 200px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.step-number {
+    background-color: darkblue;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-weight: bold;
+}
+
+
+#help1 {
+    text-align: center;
+}
+
+#help {
+    padding: 50px 20px;
+    background: linear-gradient(to right, #f0f8ff, #ffffff);
+}
+
+.faq-section {
+    max-width: 75%;
+    margin: auto;
+    text-align: left;
+    color: darkblue;
+}
+
+.faq-section details {
+    background-color: #f5f8ff;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border-left: 5px solid darkblue;
+    cursor: pointer;
+}
+
+.faq-section summary {
+    font-weight: bold;
+    font-size: 18px;
+    outline: none;
+}
+
+.faq-section p {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+
+.support-form {
+    max-width: 600px;
+    margin: 40px auto 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.support-form input,
+.support-form textarea {
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: vertical;
+}
+
+.support-form button {
+    background-color: darkblue;
+    color: white;
+    font-size: 18px;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.support-form button:hover {
+    background-color: navy;
+}
+
+footer {
+    background: linear-gradient(to right, rgb(75, 75, 146), pink);
+    ;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+    margin-top: 50px;
+}
+
+footer a {
+    color: #cce0ff;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Responses</title>
+    
+    <link rel="stylesheet" href="../css/userDashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <!-- Your existing sidebar content -->
+        </aside>
+
+        <main class="content-area">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1 id="formTitle">Form Responses</h1>
+                    <p id="formDescription"></p>
+                </div>
+                <div class="header-actions">
+                    <button id="exportResponses" class="secondary-button">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button id="refreshResponses" class="secondary-button">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </header>
+
+            <div class="responses-container">
+                <div id="noResponsesMessage" class="empty-state">
+                    <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No Responses">
+                    <h2>No Responses Yet</h2>
+                    <p>Share your form to start collecting responses</p>
+                </div>
+
+                <div id="responsesContent" style="display: none;">
+                    <div class="responses-summary">
+                        <div class="summary-card">
+                            <h3>Total Responses</h3>
+                            <p id="totalResponses">0</p>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Last Response</h3>
+                            <p id="lastResponse">-</p>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="responsesTable">
+                            <thead>
+                                <tr id="tableHeaders">
+                                    <th>#</th>
+                                    <th>Submission Date</th>
+                                    <!-- Dynamic headers will be added here -->
+                                </tr>
+                            </thead>
+                            <tbody id="responsesBody">
+                                <!-- Responses will be added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/responses.js"></script>
+</body>
+</html>

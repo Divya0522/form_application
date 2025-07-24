@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | FormCraft</title>
+    <link rel="stylesheet" href="../css/adminDashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Add these styles to your adminDashboard.css or keep them here */
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark-color);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 0;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            padding: 0 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-container img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .logo-container h1 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .main-nav {
+            flex-grow: 1;
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .profile-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 10px;
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex-grow: 1;
+        }
+
+        .profile-info h3 {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .profile-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .profile-menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: var(--dark-color);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .user-profile:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Main content styles */
+        .content-area {
+            flex-grow: 1;
+            background-color: #f5f7fa;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--dark-color);
+        }
+
+        .header-title p {
+            margin: 0.25rem 0 0;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .primary-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .primary-button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .primary-button i {
+            font-size: 0.9rem;
+        }
+
+        /* Stats cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(67, 97, 238, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .stat-info h3 {
+            margin: 0 0 0.25rem;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            font-weight: 500;
+        }
+
+        .stat-info p {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        /* Recent activity */
+        .recent-activity {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .recent-activity h2 {
+            margin: 0 0 1rem;
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(67, 97, 238, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .activity-content p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .activity-content p strong {
+            color: var(--dark-color);
+        }
+
+        .activity-content small {
+            color: var(--gray-color);
+            font-size: 0.8rem;
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        /* Templates management */
+        .templates-management {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .templates-management h2 {
+            margin: 0 0 1.5rem;
+            font-size: 1.2rem;
+            color: var(--dark-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .template-card {
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .template-image {
+            height: 160px;
+            overflow: hidden;
+        }
+
+        .template-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .template-card:hover .template-image img {
+            transform: scale(1.05);
+        }
+
+        .template-content {
+            padding: 1rem;
+        }
+
+        .template-content h3 {
+            margin: 0 0 0.5rem;
+            font-size: 1rem;
+        }
+
+        .template-content p {
+            color: var(--gray-color);
+            margin: 0 0 1rem;
+            font-size: 0.9rem;
+        }
+
+        .template-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .template-category {
+            background: #f0f0f0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        .template-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #555;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .action-btn:hover {
+            background-color: #f5f5f5;
+            color: var(--primary-color);
+        }
+
+        .action-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            padding: 0 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .secondary-button {
+            background: #f0f0f0;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .secondary-button:hover {
+            background: #e0e0e0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 0.5rem 0;
+            }
+
+            .logo-container {
+                padding: 0.5rem 1rem;
+            }
+
+            .main-nav {
+                display: flex;
+                overflow-x: auto;
+                padding: 0;
+            }
+
+            .nav-item {
+                padding: 0.75rem 1rem;
+                white-space: nowrap;
+            }
+
+            .content-area {
+                padding: 1rem;
+            }
+
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <img src="https://cdn3.iconfinder.com/data/icons/files-7-1/64/50-512.png" alt="FormCraft Logo">
+                <h1>FormCraft</h1>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="#dashboard" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#templates" class="nav-item">
+                    <i class="fas fa-clone"></i>
+                    <span>Templates</span>
+                </a>
+                <a href="#users" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="#forms" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>All Forms</span>
+                </a>
+                <a href="#analytics" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#settings" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            
+            <div class="user-profile">
+                <div class="profile-image">
+                    <img src="../asserts/profile.png" alt="Admin Profile">
+                </div>
+                <div class="profile-info">
+                    <h3 id="adminName">Admin</h3>
+                    <p>Administrator</p>
+                </div>
+                <button class="profile-menu-btn">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="dropdown-content">
+                    <a href="#profile"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Admin Dashboard</h1>
+                    <p>Manage your FormCraft platform</p>
+                </div>
+                <button class="primary-button" id="quickActionBtn">
+                    <i class="fas fa-plus"></i> Quick Action
+                </button>
+            </header>
+
+            <!-- Dashboard Stats -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Users</h3>
+                        <p id="totalUsers">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Forms</h3>
+                        <p id="totalForms">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Published Forms</h3>
+                        <p id="publishedForms">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Templates</h3>
+                        <p id="totalTemplates">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Section -->
+            <div class="recent-activity">
+                <h2>Recent Activity</h2>
+                <div class="activity-list" id="activityList">
+                    <!-- Activities will be loaded here dynamically -->
+                </div>
+            </div>
+
+            <!-- Templates Management Section -->
+            <div class="templates-management">
+                <h2>Templates Management 
+                    <button id="addTemplateBtn" class="primary-button" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        <i class="fas fa-plus"></i> Add Template
+                    </button>
+                </h2>
+                <div id="templatesGrid" class="templates-grid">
+                    <!-- Templates will be loaded here dynamically -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Template Modal -->
+    <div id="templateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Template</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="templateForm">
+                <div class="form-group">
+                    <label for="templateTitle">Template Title</label>
+                    <input type="text" id="templateTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="templateDescription">Description</label>
+                    <textarea id="templateDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="templateCategory">Category</label>
+                    <select id="templateCategory" required>
+                        <option value="Survey">Survey</option>
+                        <option value="Registration">Registration</option>
+                        <option value="Contact">Contact</option>
+                        <option value="Feedback">Feedback</option>
+                        <option value="Job Application">Job Application</option>
+                        <option value="Appointment">Appointment</option>
+                        <option value="Newsletter">Newsletter</option>
+                        <option value="RSVP">RSVP</option>
+                        <option value="Donation">Donation</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="templateImage">Template Image URL</label>
+                    <input type="text" id="templateImage" placeholder="Enter image URL">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="secondary-button" id="cancelTemplate">Cancel</button>
+                    <button type="submit" class="primary-button">Save Template</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/adminDashboard.js"></script>
+    <script>
+        // Initialize the admin dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+            
+            if (!token || !user || user.role !== 'admin') {
+                window.location.href = 'signin.html';
+                return;
+            }
+            
+            // Display admin name
+            document.getElementById('adminName').textContent = user.fullName || 'Admin';
+            
+            // Logout functionality
+            document.getElementById('logout').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'signin.html';
+            });
+            
+            // Load dashboard data
+            await loadDashboardData();
+            
+            // Load templates
+            await loadTemplates();
+            
+            // Setup template modal
+            document.getElementById('addTemplateBtn').addEventListener('click', showTemplateModal);
+            document.querySelector('#templateModal .close-modal').addEventListener('click', hideTemplateModal);
+            document.getElementById('cancelTemplate').addEventListener('click', hideTemplateModal);
+            document.getElementById('templateForm').addEventListener('submit', handleTemplateSubmit);
+            
+            // Quick action button
+            document.getElementById('quickActionBtn').addEventListener('click', () => {
+                // Open form editor to create a new form
+                window.open('formEditor.html', '_blank');
+            });
+        });
+
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/dashboard', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load dashboard data');
+                }
+                
+                const { data } = await response.json();
+                
+                // Update dashboard stats
+                document.getElementById('totalUsers').textContent = data.userCount;
+                document.getElementById('totalForms').textContent = data.formCount;
+                document.getElementById('publishedForms').textContent = data.publishedForms;
+                document.getElementById('totalTemplates').textContent = data.templateCount || 0;
+                
+                // Load recent activities
+                renderRecentActivities(data.recentActivities || []);
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                alert('Failed to load dashboard data');
+            }
+        }
+
+        function renderRecentActivities(activities) {
+            const activityList = document.getElementById('activityList');
+            activityList.innerHTML = '';
+            
+            if (activities.length === 0) {
+                activityList.innerHTML = '<p>No recent activities</p>';
+                return;
+            }
+            
+            activities.forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                
+                let icon = '';
+                let color = 'var(--primary-color)';
+                
+                switch(activity.type) {
+                    case 'user':
+                        icon = 'fa-user-plus';
+                        break;
+                    case 'form':
+                        icon = 'fa-file-upload';
+                        color = 'var(--success-color)';
+                        break;
+                    case 'response':
+                        icon = 'fa-comment-alt';
+                        color = 'var(--accent-color)';
+                        break;
+                    default:
+                        icon = 'fa-bell';
+                }
+                
+                activityItem.innerHTML = `
+                    <div class="activity-icon" style="background-color: ${color.replace(')', ', 0.1)')}; color: ${color}">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p>${activity.message} <strong>${activity.entity}</strong></p>
+                        <small>${new Date(activity.timestamp).toLocaleString()}</small>
+                    </div>
+                `;
+                
+                activityList.appendChild(activityItem);
+            });
+        }
+
+        async function loadTemplates() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/templates', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load templates');
+                
+                const { data: templates } = await response.json();
+                renderTemplates(templates);
+            } catch (error) {
+                console.error('Error loading templates:', error);
+                document.getElementById('templatesGrid').innerHTML = `
+                    <div class="error-message">
+                        <p>Failed to load templates: ${error.message}</p>
+                        <button onclick="loadTemplates()">Try Again</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderTemplates(templates) {
+            const templatesGrid = document.getElementById('templatesGrid');
+            templatesGrid.innerHTML = '';
+            
+            if (templates.length === 0) {
+                templatesGrid.innerHTML = '<p>No templates found. Create your first template.</p>';
+                return;
+            }
+            
+            templates.forEach(template => {
+                const templateCard = document.createElement('div');
+                templateCard.className = 'template-card';
+                
+                templateCard.innerHTML = `
+                    <div class="template-image">
+                        <img src="${template.templateImage || 'https://via.placeholder.com/300x200?text=Form+Template'}" alt="${template.title}">
+                    </div>
+                    <div class="template-content">
+                        <h3>${template.title}</h3>
+                        <p>${template.description || 'No description available'}</p>
+                        <div class="template-footer">
+                            <span class="template-category">${template.templateCategory}</span>
+                            <div class="template-actions">
+                                <button class="action-btn preview-template" data-id="${template._id}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn delete-template" data-id="${template._id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                templateCard.querySelector('.preview-template').addEventListener('click', () => {
+                    window.open(`formEditor.html?template=${template._id}`, '_blank');
+                });
+                
+                templateCard.querySelector('.delete-template').addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (confirm(`Are you sure you want to delete "${template.title}" template?`)) {
+                        try {
+                            const response = await fetch(`http://localhost:5000/api/admin/templates/${template._id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+                            
+                            if (response.ok) {
+                                templateCard.remove();
+                                // Update the template count
+                                const countElement = document.getElementById('totalTemplates');
+                                countElement.textContent = parseInt(countElement.textContent) - 1;
+                            } else {
+                                throw new Error('Failed to delete template');
+                            }
+                        } catch (error) {
+                            console.error('Error deleting template:', error);
+                            alert('Error deleting template: ' + error.message);
+                        }
+                    }
+                });
+                
+                templatesGrid.appendChild(templateCard);
+            });
+        }
+
+        function showTemplateModal() {
+            document.getElementById('templateModal').classList.add('active');
+            document.getElementById('templateTitle').value = '';
+            document.getElementById('templateDescription').value = '';
+            document.getElementById('templateCategory').value = 'Survey';
+            document.getElementById('templateImage').value = '';
+        }
+
+        function hideTemplateModal() {
+            document.getElementById('templateModal').classList.remove('active');
+        }
+
+        async function handleTemplateSubmit(e) {
+            e.preventDefault();
+            
+            const templateData = {
+                title: document.getElementById('templateTitle').value,
+                description: document.getElementById('templateDescription').value,
+                templateCategory: document.getElementById('templateCategory').value,
+                templateImage: document.getElementById('templateImage').value,
+                isTemplate: true,
+                fields: [] // Will be added when editing the template
+            };
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/templates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(templateData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to create template');
+                }
+                
+                const { data: template } = await response.json();
+                hideTemplateModal();
+                loadTemplates();
+                
+                // Update the template count
+                const countElement = document.getElementById('totalTemplates');
+                countElement.textContent = parseInt(countElement.textContent) + 1;
+                
+                // Open the template in editor
+                window.open(`formEditor.html?template=${template._id}`, '_blank');
+            } catch (error) {
+                console.error('Error creating template:', error);
+                alert('Error creating template: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
