@@ -509,7 +509,8 @@
         let isResponseMode = false;
 
        document.addEventListener('DOMContentLoaded', async () => {
-    const token = localStorage.getItem('token');
+    const token =
+    localStorage.getItem('token');
     const urlParams = new URLSearchParams(window.location.search);
      const templateId = urlParams.get('template');
 
