@@ -1196,21 +1196,20 @@ function generateSelect(field) {
             return container.outerHTML;
         }
 function getFieldType(uiType) {
-     const typeMap = {
-        'Short Answer': 'text',
-        'Paragraph': 'textarea',
-        'Multiple Choice': 'radio',
-        'Checkboxes': 'checkbox',
-        'Dropdown': 'dropdown',  // This must be 'dropdown'
-        'File Upload': 'file',
-        'Linear Scaling': 'range',
-        'Rating': 'rating',
-        'Date': 'date',
-        'Time': 'time'
-    };
-    return typeMap[uiType] || 'text';
+  const typeMap = {
+    'Short Answer': 'text',
+    'Paragraph': 'textarea',
+    'Multiple Choice': 'radio',
+    'Checkboxes': 'checkbox',
+    'Dropdown': 'dropdown',  // Must match schema
+    'File Upload': 'file',
+    'Linear Scaling': 'range',
+    'Rating': 'rating',
+    'Date': 'date',
+    'Time': 'time'
+  };
+  return typeMap[uiType] || 'text';
 }
-
 function saveQuestion(event) {
     event.preventDefault();
     
@@ -1631,11 +1630,13 @@ async function saveForm() {
 
             const field = {
     id: input.id || `field_${Date.now()}`,
-    type: input.type || (input.tagName === 'TEXTAREA' ? 'textarea' : 
-                       input.tagName === 'SELECT' ? 'dropdown' : 'text'),
+    type: input.tagName === 'SELECT' ? 'dropdown' :
+          input.tagName === 'TEXTAREA' ? 'textarea' :
+          input.type || 'text',
     label: label,
     required: input.required || false
 };
+
 
             // Handle different field types
             switch(field.type) {
@@ -1647,7 +1648,7 @@ async function saveForm() {
                     });
                     break;
                     
-                case 'select':
+                case 'dropdown':
                     field.options = [];
                     block.querySelectorAll('option').forEach(opt => {
                         if (opt.value) field.options.push(opt.textCfontent);

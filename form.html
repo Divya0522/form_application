@@ -256,7 +256,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     break;
                     
                 case 'dropdown':
-                case 'select':
                     input = document.createElement('select');
                     input.name = field.id;
                     input.required = field.required || false;
@@ -470,75 +469,64 @@ case 'range':
         });
 
 document.getElementById('responseForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const errorElement = document.getElementById('errorMessage');
-    errorElement.style.display = 'none';
-    
-    // Create response data structure
-    const responses = [];
-    const formFields = document.querySelectorAll('.form-field');
-    
-    formFields.forEach(fieldDiv => {
-        const fieldId = fieldDiv.dataset.fieldId;
-        const field = form.fields.find(f => f.id === fieldId);
-        
-        if (!field) return;
-        
-        // Handle different field types
-        switch(field.type) {
-            case 'checkbox':
-                const checked = Array.from(fieldDiv.querySelectorAll('input[type="checkbox"]:checked'))
-                                    .map(cb => cb.value);
-                if (checked.length > 0) {
-                    responses.push({
-                        fieldId,
-                        value: checked
-                    });
-                }
-                break;
-                
-            case 'radio':
-                const selectedRadio = fieldDiv.querySelector('input[type="radio"]:checked');
-                if (selectedRadio) {
-                    responses.push({
-                        fieldId,
-                        value: selectedRadio.value
-                    });
-                }
-                break;
-                
-            default:
-                const input = fieldDiv.querySelector('input, textarea, select');
-                if (input && input.value && input.value.trim() !== '') {
-                    responses.push({
-                        fieldId,
-                        value: input.value.trim()
-                    });
-                }
-        }
-    });
+  e.preventDefault();
+  
+  const responses = [];
+  const formFields = document.querySelectorAll('.form-field');
+  
+  formFields.forEach(fieldDiv => {
+    const fieldId = fieldDiv.dataset.fieldId;
+    const field = form.fields.find(f => f.id === fieldId);
+    if (!field) return;
 
-    try {
-        const response = await fetch(`http://localhost:5000/api/responses/${formId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ responses })
-        });
+    let value;
+    
+    switch(field.type) {
+      case 'checkbox':
+        value = Array.from(fieldDiv.querySelectorAll('input[type="checkbox"]:checked'))
+                   .map(cb => cb.value);
+        break;
         
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Submission failed');
-        }
+      case 'radio':
+        const selectedRadio = fieldDiv.querySelector('input[type="radio"]:checked');
+        value = selectedRadio ? selectedRadio.value : null;
+        break;
         
-        document.getElementById('responseForm').style.display = 'none';
-        document.getElementById('thankYou').style.display = 'block';
-    } catch (error) {
-        errorElement.textContent = 'Error submitting form: ' + error.message;
-        errorElement.style.display = 'block';
-        console.error('Submission error:', error);
+      case 'dropdown':
+        const select = fieldDiv.querySelector('select');
+        value = select ? select.value : null;
+        break;
+        
+      default:
+        const input = fieldDiv.querySelector('input, textarea, select');
+        value = input ? input.value : null;
     }
+    
+    if (value !== null && value !== '' && !(Array.isArray(value) && value.length === 0)) {
+      responses.push({
+        fieldId,
+        value
+      });
+    }
+  });
+
+  try {
+    const response = await fetch(`http://localhost:5000/api/responses/${formId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ responses })
+    });
+    
+    if (!response.ok) throw new Error('Submission failed');
+    
+    document.getElementById('responseForm').style.display = 'none';
+    document.getElementById('thankYou').style.display = 'block';
+  } catch (error) {
+    document.getElementById('errorMessage').textContent = 'Error: ' + error.message;
+    document.getElementById('errorMessage').style.display = 'block';
+  }
 });
 
     } catch (error) {

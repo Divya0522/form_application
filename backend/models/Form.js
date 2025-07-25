@@ -26,21 +26,18 @@ const formSchema = new mongoose.Schema({
     type: Date
   },
   fields: [{
-    id: {
+    id: String,
+    type: {
       type: String,
+      enum: ['text', 'email', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'textarea', 'file', 'rating', 'range'],
       required: true
     },
-    enum: ['text', 'email', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'textarea', 'file', 'rating']
-    ,
-    label: {
-      type: String,
-      required: true
-    },
-    options: [String],
-    required: {
-      type: Boolean,
-      default: false
-    }
+    label: String,
+    options: [String],  // For dropdown, radio, checkbox
+    required: Boolean,
+    placeholder: String, // For text inputs
+    min: Number,        // For range/number
+    max: Number         // For range/number/rating
   }],
   isTemplate: {
     type: Boolean,
