@@ -51,6 +51,36 @@ app.use((req, res, next) => {
 });
 
 
+// Update the /save-form endpoint
+app.post('/save-form', (req, res) => {
+    const formData = req.body;
+    const formId = formData.id || Date.now().toString();
+    
+    // Ensure the forms directory exists
+    if (!fs.existsSync('forms')) {
+        fs.mkdirSync('forms');
+    }
+    
+    fs.writeFile(`forms/${formId}.json`, JSON.stringify(formData), (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error saving form');
+        }
+        res.send({ id: formId });
+    });
+});
+
+// Update the /load-form endpoint
+app.get('/load-form/:id', (req, res) => {
+    fs.readFile(`forms/${req.params.id}.json`, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            return res.status(404).send('Form not found');
+        }
+        res.send(JSON.parse(data));
+    });
+});
+
 app.get('/api/test', (req, res) => {
   console.log('Test route hit');
   res.json({ message: 'Backend is working!' });
