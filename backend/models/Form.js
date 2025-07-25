@@ -30,11 +30,8 @@ const formSchema = new mongoose.Schema({
       type: String,
       required: true
     },
-    type: {
-      type: String,
-      enum: ['text', 'email', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'textarea', 'file', 'rating'],
-      required: true
-    },
+    enum: ['text', 'email', 'number', 'date', 'dropdown', 'radio', 'checkbox', 'textarea', 'file', 'rating']
+    ,
     label: {
       type: String,
       required: true
