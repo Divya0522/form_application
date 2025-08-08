@@ -36,7 +36,6 @@ async function initializeTemplates() {
   }
 }
 
-
 // Change the connection handler to:
 connectDB().then(async () => {
   console.log('Database connected, initializing templates...');
@@ -60,14 +59,7 @@ app.use(cors({
 }));
 
 
-app.get('/api/seed-templates', async (req, res) => {
-    try {
-        await seedTemplates();
-        res.status(200).json({ success: true, message: 'Templates seeded successfully' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
+
 
 app.use(express.json());
 
