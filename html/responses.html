@@ -69,5 +69,38 @@
     </div>
 
     <script src="../js/responses.js"></script>
+    <!-- Add this script at the bottom of the file -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Highlight the responses nav item
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.querySelector('span').textContent === 'Responses') {
+                item.classList.add('active');
+            }
+        });
+        
+        // Load form responses when the page loads
+        const urlParams = new URLSearchParams(window.location.search);
+        const formId = urlParams.get('formId');
+        
+        if (formId) {
+            // Your code to load responses for this form
+            console.log('Loading responses for form:', formId);
+            // Implement your loadResponses(formId) function here
+        } else {
+            // Show message to select a form
+            document.getElementById('noResponsesMessage').innerHTML = `
+                <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No Form Selected">
+                <h2>No Form Selected</h2>
+                <p>Please select a form from the dashboard to view responses</p>
+                <button class="primary-button" onclick="window.location.href='userDashboard.html'">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+            `;
+        }
+    });
+</script>
 </body>
 </html>

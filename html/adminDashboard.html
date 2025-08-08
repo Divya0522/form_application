@@ -398,31 +398,24 @@
         }
 
         .template-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
 
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #555;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-        }
+.action-btn {
+  background: #f0f0f0;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
-        .action-btn:hover {
-            background-color: #f5f5f5;
-            color: var(--primary-color);
-        }
+.action-btn:hover {
+  background: #e0e0e0;
+}
 
-        .action-btn i {
-            font-size: 0.9rem;
-        }
+        
 
         /* Modal styles */
         .modal {
@@ -578,7 +571,7 @@
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="#templates" class="nav-item">
+                <a href="../html/Templates.html" class="nav-item">
                     <i class="fas fa-clone"></i>
                     <span>Templates</span>
                 </a>
@@ -625,9 +618,7 @@
                     <h1>Admin Dashboard</h1>
                     <p>Manage your FormCraft platform</p>
                 </div>
-                <button class="primary-button" id="quickActionBtn">
-                    <i class="fas fa-plus"></i> Quick Action
-                </button>
+                
             </header>
 
             <!-- Dashboard Stats -->
@@ -650,6 +641,15 @@
                         <p id="totalForms">0</p>
                     </div>
                 </div>
+                  <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-sync-alt"></i>
+        </div>
+        <div class="stat-info">
+            <h3>Active Templates</h3>
+            <p id="activeTemplates">0</p>
+        </div>
+    </div>
                 <div class="stat-card">
                     <div class="stat-icon">
                         <i class="fas fa-check-circle"></i>
@@ -692,49 +692,80 @@
         </main>
     </div>
 
-    <!-- Add Template Modal -->
-    <div id="templateModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add New Template</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <form id="templateForm">
-                <div class="form-group">
-                    <label for="templateTitle">Template Title</label>
-                    <input type="text" id="templateTitle" required>
-                </div>
-                <div class="form-group">
-                    <label for="templateDescription">Description</label>
-                    <textarea id="templateDescription" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="templateCategory">Category</label>
-                    <select id="templateCategory" required>
-                        <option value="Survey">Survey</option>
-                        <option value="Registration">Registration</option>
-                        <option value="Contact">Contact</option>
-                        <option value="Feedback">Feedback</option>
-                        <option value="Job Application">Job Application</option>
-                        <option value="Appointment">Appointment</option>
-                        <option value="Newsletter">Newsletter</option>
-                        <option value="RSVP">RSVP</option>
-                        <option value="Donation">Donation</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="templateImage">Template Image URL</label>
-                    <input type="text" id="templateImage" placeholder="Enter image URL">
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="secondary-button" id="cancelTemplate">Cancel</button>
-                    <button type="submit" class="primary-button">Save Template</button>
-                </div>
-            </form>
+   <div id="templateModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Template</h2>
+            <button class="close-modal" id="closeTemplateModal">&times;</button>
         </div>
+        <form id="templateForm">
+            <div class="form-group">
+                <label for="templateTitle">Template Title</label>
+                <input type="text" id="templateTitle" required>
+            </div>
+            <div class="form-group">
+                <label for="templateDescription">Description</label>
+                <textarea id="templateDescription" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="templateCategory">Category</label>
+                <select id="templateCategory" required>
+                    <option value="Survey">Survey</option>
+                    <option value="Registration">Registration</option>
+                    <option value="Contact">Contact</option>
+                    <option value="Feedback">Feedback</option>
+                    <option value="Job Application">Job Application</option>
+                    <option value="Appointment">Appointment</option>
+                    <option value="Newsletter">Newsletter</option>
+                    <option value="RSVP">RSVP</option>
+                    <option value="Donation">Donation</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="templateImage">Template Image URL</label>
+                <input type="text" id="templateImage" placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="secondary-button" id="cancelTemplate">Cancel</button>
+                <button type="submit" class="primary-button">Create Template</button>
+            </div>
+        </form>
     </div>
-
+</div>
+    <!-- Add this after templateModal -->
+<div id="editTemplateModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Edit Template</h2>
+      <button class="close-modal">&times;</button>
+    </div>
+    <form id="editTemplateForm">
+      <div class="form-group">
+        <label for="editTemplateTitle">Template Title</label>
+        <input type="text" id="editTemplateTitle" required>
+      </div>
+      <div class="form-group">
+        <label for="editTemplateDescription">Description</label>
+        <textarea id="editTemplateDescription" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="editTemplateCategory">Category</label>
+        <select id="editTemplateCategory" required>
+          <!-- Options same as create modal -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="editTemplateImage">Template Image URL</label>
+        <input type="text" id="editTemplateImage" placeholder="Enter image URL">
+      </div>
+      <div class="form-actions">
+        <button type="button" class="secondary-button" id="cancelEditTemplate">Cancel</button>
+        <button type="submit" class="primary-button">Update Template</button>
+      </div>
+    </form>
+  </div>
+</div>
     <script src="../js/adminDashboard.js"></script>
     <script>
         // Initialize the admin dashboard
@@ -764,16 +795,15 @@
             // Load templates
             await loadTemplates();
             
-            // Setup template modal
-            document.getElementById('addTemplateBtn').addEventListener('click', showTemplateModal);
-            document.querySelector('#templateModal .close-modal').addEventListener('click', hideTemplateModal);
-            document.getElementById('cancelTemplate').addEventListener('click', hideTemplateModal);
-            document.getElementById('templateForm').addEventListener('submit', handleTemplateSubmit);
+            document.getElementById('addTemplateBtn')?.addEventListener('click', showTemplateModal);
+    document.getElementById('closeTemplateModal')?.addEventListener('click', hideTemplateModal);
+    document.getElementById('cancelTemplate')?.addEventListener('click', hideTemplateModal);
+    document.getElementById('templateForm')?.addEventListener('submit', handleTemplateSubmit);
             
             // Quick action button
             document.getElementById('quickActionBtn').addEventListener('click', () => {
-                // Open form editor to create a new form
-                window.open('formEditor.html', '_blank');
+                // Open frm editor to create a new form
+                window.open('templateEditor.html', '_blank');
             });
         });
 
@@ -853,150 +883,126 @@
         }
 
         async function loadTemplates() {
-            try {
-                const response = await fetch('http://localhost:5000/api/admin/templates', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                
-                if (!response.ok) throw new Error('Failed to load templates');
-                
-                const { data: templates } = await response.json();
-                renderTemplates(templates);
-            } catch (error) {
-                console.error('Error loading templates:', error);
-                document.getElementById('templatesGrid').innerHTML = `
-                    <div class="error-message">
-                        <p>Failed to load templates: ${error.message}</p>
-                        <button onclick="loadTemplates()">Try Again</button>
-                    </div>
-                `;
+    try {
+        const response = await fetch('http://localhost:5000/api/admin/templates', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load templates');
+        
+        const { data: templates } = await response.json();
+        renderTemplates(templates);
+    } catch (error) {
+        console.error('Error loading templates:', error);
+        const templatesGrid = document.getElementById('templatesGrid');
+        if (templatesGrid) {
+            templatesGrid.innerHTML = `<div class="error-message">Error loading templates: ${error.message}</div>`;
         }
-
-        function renderTemplates(templates) {
-            const templatesGrid = document.getElementById('templatesGrid');
-            templatesGrid.innerHTML = '';
-            
-            if (templates.length === 0) {
-                templatesGrid.innerHTML = '<p>No templates found. Create your first template.</p>';
-                return;
-            }
-            
-            templates.forEach(template => {
-                const templateCard = document.createElement('div');
-                templateCard.className = 'template-card';
-                
-                templateCard.innerHTML = `
-                    <div class="template-image">
-                        <img src="${template.templateImage || 'https://via.placeholder.com/300x200?text=Form+Template'}" alt="${template.title}">
+    }
+}
+        
+function renderTemplates(templates) {
+    const templatesGrid = document.getElementById('templatesGrid');
+    if (!templatesGrid) return;
+    
+    templatesGrid.innerHTML = '';
+    
+    templates.forEach(template => {
+        const card = document.createElement('div');
+        card.className = 'template-card';
+        card.innerHTML = `
+            <div class="template-image">
+                <img src="${template.templateImage || 'https://via.placeholder.com/300x200?text=Form+Template'}" alt="${template.title}">
+            </div>
+            <div class="template-content">
+                <h3>${template.title}</h3>
+                <p>${template.description || 'No description'}</p>
+                <div class="template-footer">
+                    <span class="template-category">${template.templateCategory || 'General'}</span>
+                    <div class="template-actions">
+                        <button class="action-btn edit-template" data-id="${template._id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-template" data-id="${template._id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
-                    <div class="template-content">
-                        <h3>${template.title}</h3>
-                        <p>${template.description || 'No description available'}</p>
-                        <div class="template-footer">
-                            <span class="template-category">${template.templateCategory}</span>
-                            <div class="template-actions">
-                                <button class="action-btn preview-template" data-id="${template._id}">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="action-btn delete-template" data-id="${template._id}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                templateCard.querySelector('.preview-template').addEventListener('click', () => {
-                    window.open(`formEditor.html?template=${template._id}`, '_blank');
-                });
-                
-                templateCard.querySelector('.delete-template').addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    if (confirm(`Are you sure you want to delete "${template.title}" template?`)) {
-                        try {
-                            const response = await fetch(`http://localhost:5000/api/admin/templates/${template._id}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                                }
-                            });
-                            
-                            if (response.ok) {
-                                templateCard.remove();
-                                // Update the template count
-                                const countElement = document.getElementById('totalTemplates');
-                                countElement.textContent = parseInt(countElement.textContent) - 1;
-                            } else {
-                                throw new Error('Failed to delete template');
-                            }
-                        } catch (error) {
-                            console.error('Error deleting template:', error);
-                            alert('Error deleting template: ' + error.message);
+                </div>
+            </div>
+        `;
+        
+        // Add event listeners
+        card.querySelector('.edit-template').addEventListener('click', () => {
+            window.open(`templateEditor.html?template=${template._id}`, '_blank');
+        });
+        
+        card.querySelector('.delete-template').addEventListener('click', async () => {
+            if (confirm(`Delete "${template.title}"?`)) {
+                try {
+                    await fetch(`http://localhost:5000/api/admin/templates/${template._id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }
-                    }
-                });
-                
-                templatesGrid.appendChild(templateCard);
-            });
-        }
-
-        function showTemplateModal() {
-            document.getElementById('templateModal').classList.add('active');
-            document.getElementById('templateTitle').value = '';
-            document.getElementById('templateDescription').value = '';
-            document.getElementById('templateCategory').value = 'Survey';
-            document.getElementById('templateImage').value = '';
-        }
-
-        function hideTemplateModal() {
-            document.getElementById('templateModal').classList.remove('active');
-        }
-
-        async function handleTemplateSubmit(e) {
-            e.preventDefault();
-            
-            const templateData = {
-                title: document.getElementById('templateTitle').value,
-                description: document.getElementById('templateDescription').value,
-                templateCategory: document.getElementById('templateCategory').value,
-                templateImage: document.getElementById('templateImage').value,
-                isTemplate: true,
-                fields: [] // Will be added when editing the template
-            };
-            
-            try {
-                const response = await fetch('http://localhost:5000/api/admin/templates', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify(templateData)
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to create template');
+                    });
+                    card.remove();
+                } catch (error) {
+                    alert('Error deleting template: ' + error.message);
                 }
-                
-                const { data: template } = await response.json();
-                hideTemplateModal();
-                loadTemplates();
-                
-                // Update the template count
-                const countElement = document.getElementById('totalTemplates');
-                countElement.textContent = parseInt(countElement.textContent) + 1;
-                
-                // Open the template in editor
-                window.open(`formEditor.html?template=${template._id}`, '_blank');
-            } catch (error) {
-                console.error('Error creating template:', error);
-                alert('Error creating template: ' + error.message);
             }
-        }
-    </script>
+        });
+        
+        templatesGrid.appendChild(card);
+    });
+}
+
+function showTemplateModal() {
+    const modal = document.getElementById('templateModal');
+    if(modal) modal.classList.add('active');
+}
+
+function hideTemplateModal() {
+    const modal = document.getElementById('templateModal');
+    if(modal) modal.classList.remove('active');
+}
+
+    async function handleTemplateSubmit(e) {
+    e.preventDefault();
+    
+    const templateData = {
+        title: document.getElementById('templateTitle').value,
+        description: document.getElementById('templateDescription').value,
+        templateCategory: document.getElementById('templateCategory').value,
+        templateImage: document.getElementById('templateImage').value || 'https://via.placeholder.com/300x200?text=Form+Template',
+        isTemplate: true
+    };
+    
+    try {
+        const response = await fetch('http://localhost:5000/api/admin/templates', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(templateData)
+        });
+        
+        if (!response.ok) throw new Error('Failed to create template');
+        
+        const { data: template } = await response.json();
+        hideTemplateModal();
+        loadTemplates();
+        
+        // Open the template in editor
+        window.open(`templateEditor.html?template=${template._id}`, '_blank');
+    } catch (error) {
+        console.error('Error creating template:', error);
+        alert('Error creating template: ' + error.message);
+    }
+}
+
+   </script>
 </body>
 </html>

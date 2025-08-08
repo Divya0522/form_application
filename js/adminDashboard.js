@@ -116,9 +116,9 @@ function renderTemplates(templates) {
             </div>
         `;
         
-        templateCard.querySelector('.preview-template').addEventListener('click', () => {
-            window.open(`formEditor.html?template=${template._id}`, '_blank');
-        });
+        card.querySelector('.edit-template').addEventListener('click', () => {
+    window.open(`templateEditor.html?template=${template._id}`, '_blank');
+});
         
         templateCard.querySelector('.delete-template').addEventListener('click', async (e) => {
             e.stopPropagation();
@@ -145,6 +145,30 @@ function renderTemplates(templates) {
         
         templatesGrid.appendChild(templateCard);
     });
+}
+// In adminDashboard.js
+async function loadDashboardData() {
+    try {
+        const response = await fetch('http://localhost:5000/api/admin/dashboard', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load dashboard data');
+        
+        const { data } = await response.json();
+        
+        // Update dashboard stats
+        document.getElementById('totalUsers').textContent = data.userCount;
+        document.getElementById('totalForms').textContent = data.formCount;
+        document.getElementById('publishedForms').textContent = data.publishedForms;
+        document.getElementById('totalTemplates').textContent = data.templateCount || 0;
+        
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        alert('Failed to load dashboard data');
+    }
 }
 
 function showTemplateModal() {

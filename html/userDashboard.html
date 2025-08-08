@@ -36,17 +36,21 @@
 </nav>
             
             <div class="user-profile">
-                <div class="profile-image">
-                    <img src="../asserts/profile.png" alt="User Profile">
-                </div>
-                <div class="profile-info">
-                    <h3 id="username-display">Username</h3>
-                    <p>Free Plan</p>
-                </div>
-                <button class="profile-menu-btn">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-            </div>
+    <div class="profile-image">
+        <img src="../asserts/profile.png" alt="User Profile">
+    </div>
+    <div class="profile-info">
+        <h3 id="username-display">Username</h3>
+        <p>Free Plan</p>
+    </div>
+    <button class="profile-menu-btn" id="profileMenuBtn">
+        <i class="fas fa-ellipsis-v"></i>
+    </button>
+    <div class="dropdown-content" id="profileDropdown" style="display: none;">
+        <a href="#" id="editProfile"><i class="fas fa-user-edit"></i> Edit Profile</a>
+        <a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+</div>
         </aside>
 
        

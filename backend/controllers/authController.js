@@ -46,7 +46,40 @@ exports.register = async (req, res, next) => {
   }
 };
 
+// exports.login = async (req, res, next) => {
+//   try {
+//     const { email, password } = req.body;
 
+//     if (!email || !password) {
+//       return next(new ErrorHandler('Please provide email and password', 400));
+//     }
+
+//     const user = await User.findOne({ email }).select('+password');
+//     if (!user) {
+//       return next(new ErrorHandler('Invalid credentials', 401));
+//     }
+
+//     const isMatch = await user.comparePassword(password);
+//     if (!isMatch) {
+//       return next(new ErrorHandler('Invalid credentials', 401));
+//     }
+
+//     const token = generateToken(user._id);
+
+//     res.status(200).json({
+//       success: true,
+//       token,
+//       user: {
+//         id: user._id,
+//         fullName: user.fullName,
+//         email: user.email,
+//         role: user.role
+//       }
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -60,7 +93,8 @@ exports.login = async (req, res, next) => {
       return next(new ErrorHandler('Invalid credentials', 401));
     }
 
-    const isMatch = await user.comparePassword(password);
+    // Use bcrypt directly for comparison
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return next(new ErrorHandler('Invalid credentials', 401));
     }
@@ -78,10 +112,10 @@ exports.login = async (req, res, next) => {
       }
     });
   } catch (error) {
-    next(error);
+    console.error('Login error:', error);
+    next(new ErrorHandler('Server error', 500));
   }
 };
-
 exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;

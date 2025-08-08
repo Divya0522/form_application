@@ -153,15 +153,16 @@
 
         .template-badge {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background-color: var(--success-color);
+            top: 10px;
+            right: 10px;
+            background-color: #4361ee;
             color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
         }
+
 
         @media (max-width: 768px) {
             .templates-grid {
@@ -202,10 +203,52 @@
         </div>
 
         <div class="templates-grid">
-            
-           
+            <!-- Templates will be loaded here -->
         </div>
     </div>
-    <script src="../js/Templates.js"></script>
+
+   <script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/forms/templates/public', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      const { data: templates } = await response.json();
+      renderTemplates(templates);
+    } catch (error) {
+      console.error('Error loading templates:', error);
+    }
+  });
+
+  function renderTemplates(templates) {
+    const grid = document.querySelector('.templates-grid');
+    grid.innerHTML = '';
+    
+    templates.forEach(template => {
+      const card = document.createElement('div');
+      card.className = 'template-card';
+      card.innerHTML = `
+        <div class="template-image">
+          <img src="${template.templateImage}" alt="${template.title}">
+        </div>
+        <div class="template-content">
+          <h3>${template.title}</h3>
+          <p>${template.description}</p>
+          <button class="use-template-btn" data-id="${template._id}">
+            Use Template
+          </button>
+        </div>
+      `;
+      
+      card.querySelector('button').addEventListener('click', () => {
+        window.location.href = `formEditor.html?template=${template._id}`;
+      });
+      
+      grid.appendChild(card);
+    });
+  }
+</script>
 </body>
 </html>

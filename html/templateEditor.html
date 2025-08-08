@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Editor | FormCraft</title>
+    <link rel="stylesheet" href="../css/templateEditor.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Top Toolbar -->
+        <header class="toolbar">
+            <div class="toolbar-left">
+                <button id="saveTemplate" class="toolbar-btn">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button id="undoBtn" class="toolbar-btn" title="Undo">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button id="redoBtn" class="toolbar-btn" title="Redo">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+            <div class="toolbar-center">
+                <input type="text" id="templateTitle" placeholder="Template Title" class="title-input">
+            </div>
+            <div class="toolbar-right">
+                <button id="closeEditor" class="toolbar-btn">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="editor-content">
+            <!-- Form Elements Panel -->
+            <aside class="elements-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-shapes"></i> Form Elements</h3>
+                </div>
+                <div class="elements-list">
+                    <div class="element-item" draggable="true" data-type="text">
+                        <i class="fas fa-font"></i> Text Input
+                    </div>
+                    <div class="element-item" draggable="true" data-type="email">
+                        <i class="fas fa-envelope"></i> Email Input
+                    </div>
+                    <div class="element-item" draggable="true" data-type="number">
+                        <i class="fas fa-hashtag"></i> Number Input
+                    </div>
+                    <div class="element-item" draggable="true" data-type="date">
+                        <i class="fas fa-calendar"></i> Date Picker
+                    </div>
+                    <div class="element-item" draggable="true" data-type="dropdown">
+                        <i class="fas fa-caret-down"></i> Dropdown
+                    </div>
+                    <div class="element-item" draggable="true" data-type="checkbox">
+                        <i class="fas fa-check-square"></i> Checkbox
+                    </div>
+                    <div class="element-item" draggable="true" data-type="radio">
+                        <i class="fas fa-dot-circle"></i> Radio Buttons
+                    </div>
+                    <div class="element-item" draggable="true" data-type="textarea">
+                        <i class="fas fa-paragraph"></i> Long Text
+                    </div>
+                    <div class="element-item" draggable="true" data-type="section">
+                        <i class="fas fa-grip-lines"></i> Section Header
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Form Preview Area -->
+            <main class="preview-area" id="previewArea">
+                <div class="preview-header">
+                    <h2 id="previewTitle">Template Preview</h2>
+                    <p>Drag elements from the left panel to build your form</p>
+                </div>
+                <div class="form-preview" id="formPreview"></div>
+            </main>
+
+            <!-- Element Properties Panel -->
+            <aside class="properties-panel" id="propertiesPanel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-sliders-h"></i> Element Properties</h3>
+                </div>
+                <div class="property-item">
+    <label>Description</label>
+    <textarea id="prop-description"></textarea>
+</div>
+
+                <div class="properties-form" id="propertiesForm">
+                    <div class="no-selection">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Select an element to edit its properties</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../js/templateEditor.js"></script>
+</body>
+</html>

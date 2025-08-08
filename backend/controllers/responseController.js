@@ -8,36 +8,28 @@ exports.submitResponse = async (req, res, next) => {
     const { responses } = req.body;
 
     // Validate form exists and is published
-    const form = await Form.findOne({
-      _id: formId,
-      isPublished: true
-    });
-    
-    if (!form) {
-      return res.status(404).json({
-        success: false,
-        error: 'Form not found or not published'
-      });
+    const form = await Form.findById(formId);
+    if (!form || (!form.isPublished && !form.isTemplate)) {
+      return next(new ErrorHandler('Form not found or not published', 404));
     }
 
-    // Create and save response
-    const responseDoc = await Response.create({
+    // Create response
+    const response = new Response({
       form: formId,
-      responses,
-      submittedBy: req.user?.id, // Will be null for public submissions
-      createdAt: new Date()
+      responses: responses
     });
+
+    await response.save();
 
     res.status(201).json({
       success: true,
-      data: responseDoc
+      data: response
     });
-    
   } catch (error) {
-    next(error);
+    console.error('Response submission error:', error);
+    next(new ErrorHandler('Internal server error', 500));
   }
 };
-
 exports.getFormResponses = async (req, res, next) => {
   try {
     const { formId } = req.params;
@@ -84,6 +76,20 @@ exports.getResponseCount = async (req, res, next) => {
 
     const count = await Response.countDocuments({ form: formId });
 
+    res.status(200).json({
+      success: true,
+      count
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getResponseCounts = async (req, res, next) => {
+  try {
+    const formId = req.params.id;
+    const count = await Response.countDocuments({ form: formId });
+    
     res.status(200).json({
       success: true,
       count

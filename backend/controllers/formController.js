@@ -1,16 +1,13 @@
 const Form = require('../models/Form');
 const ErrorHandler = require('../utils/errorHandler');
 
+const Response =require('../models/Response');
+
 
 exports.getUserForms = async (req, res, next) => {
   try {
-
     const forms = await Form.find({ createdBy: req.user.id }).select('-fields');
-    res.status(200).json({
-      success: true,
-      count: forms.length,
-      data: forms
-    });
+    res.status(200).json(forms); // Return array directly
   } catch (error) {
     next(error);
   }
@@ -161,12 +158,14 @@ exports.unpublishForm = async (req, res, next) => {
   }
 };
 
-
 exports.getPublicForm = async (req, res, next) => {
     try {
         const form = await Form.findOne({
             _id: req.params.id,
-            isPublished: true
+            $or: [
+                { isPublished: true },
+                { isTemplate: true }
+            ]
         }).select('-createdBy');
 
         if (!form) {
@@ -180,4 +179,44 @@ exports.getPublicForm = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+// Update getFormWithResponseCount function
+exports.getFormWithResponseCount = async (req, res, next) => {
+  try {
+    const forms = await Form.find({ createdBy: req.user.id })
+      .select('-fields')
+      .lean();
+
+    const formsWithResponseCount = await Promise.all(
+      forms.map(async (form) => {
+        const responseCount = await Response.countDocuments({ form: form._id }); // Correct usage
+        return {
+          ...form,
+          responseCount
+        };
+      })
+    );
+
+    res.status(200).json(formsWithResponseCount);
+  } catch (error) {
+    next(error);
+  }
+};
+// Add to formController.js
+exports.getTemplateById = async (req, res) => {
+  try {
+    const form = await Form.findOne({
+      _id: req.params.id,
+      isTemplate: true
+    });
+    
+    if (!form) {
+      return res.status(404).json({ message: 'Template not found' });
+    }
+    
+    res.json({ data: form });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };

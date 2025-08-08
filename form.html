@@ -192,350 +192,633 @@ button[type="submit"]:hover {
         </div>
     </div>
 
-    <script>
-document.addEventListener('DOMContentLoaded', async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const formId = urlParams.get('id');
-    
-    if (!formId) {
-        document.getElementById('formTitle').textContent = 'Form not found';
-        return;
-    }
 
-    try {
-        // Load form data
-        const response = await fetch(`http://localhost:5000/api/forms/public/${formId}`);
-        if (!response.ok) throw new Error('Form not found or not published');
-        
-        const { data: form } = await response.json();
-        document.getElementById('formTitle').textContent = form.title;
-        if (form.description) {
-            document.getElementById('formDescription').textContent = form.description;
-        }
 
-        // Render form fields
-        const formFields = document.getElementById('formFields');
-        
-        form.fields.forEach((field) => {
-            const fieldDiv = document.createElement('div');
-            fieldDiv.className = 'form-field';
-            fieldDiv.dataset.fieldId = field.id;  // Store field ID in data attribute
-            
-            const label = document.createElement('label');
-            label.textContent = field.label || `Field ${field.id}`;
-            
-            if (field.required) {
-                const span = document.createElement('span');
-                span.className = 'required';
-                span.textContent = ' *';
-                label.appendChild(span);
-            }
-            
-            let input;
-            
-            switch(field.type) {
-                case 'text':
-                case 'email':
-                case 'number':
-                case 'date':
-                case 'time':
-                    input = document.createElement('input');
-                    input.type = field.type;
-                    input.name = field.id;
-                    input.required = field.required || false;
-                    if (field.placeholder) input.placeholder = field.placeholder;
-                    if (field.min) input.min = field.min;
-                    if (field.max) input.max = field.max;
-                    break;
-                    
-                case 'textarea':
-                    input = document.createElement('textarea');
-                    input.name = field.id;
-                    input.required = field.required || false;
-                    if (field.placeholder) input.placeholder = field.placeholder;
-                    break;
-                    
-                case 'dropdown':
-                    input = document.createElement('select');
-                    input.name = field.id;
-                    input.required = field.required || false;
-                    
-                    // Add default empty option
-                    const defaultOption = document.createElement('option');
-                    defaultOption.value = '';
-                    defaultOption.textContent = '-- Select --';
-                    defaultOption.selected = true;
-                    defaultOption.disabled = true;
-                    input.appendChild(defaultOption);
-                    
-                    // Add other options
-                    if (field.options) {
-                        field.options.forEach(option => {
-                            const optionElement = document.createElement('option');
-                            optionElement.value = option;
-                            optionElement.textContent = option;
-                            input.appendChild(optionElement);
-                        });
-                    }
-                    break;
-    case 'radio':
-    if (field.options) {
-        const optionGroup = document.createElement('div');
-        optionGroup.className = 'option-group';
-        
-        field.options.forEach(option => {
-            const optionItem = document.createElement('div');
-            optionItem.className = 'option-item';
-            
-            const radioInput = document.createElement('input');
-            radioInput.type = 'radio';
-            radioInput.name = field.id;  // This groups them by field.id
-            radioInput.value = option;
-            radioInput.id = `${field.id}_${option.replace(/\s+/g, '_')}`;
-            radioInput.required = field.required || false;
-            
-            const radioLabel = document.createElement('label');
-            radioLabel.htmlFor = radioInput.id;
-            radioLabel.textContent = option;
-            
-            optionItem.appendChild(radioInput);
-            optionItem.appendChild(radioLabel);
-            optionGroup.appendChild(optionItem);
-        });
-        
-        fieldDiv.appendChild(label);
-        fieldDiv.appendChild(optionGroup);
-    }
-    break; 
-case 'checkbox':
-    if (field.options) {
-        const optionGroup = document.createElement('div');
-        optionGroup.className = 'option-group';
-        
-        field.options.forEach(option => {
-            const optionItem = document.createElement('div');
-            optionItem.className = 'option-item';
-            
-            const checkboxInput = document.createElement('input');
-            checkboxInput.type = 'checkbox';
-            checkboxInput.name = `${field.id}[]`;
-            checkboxInput.value = option;
-            checkboxInput.id = `${field.id}_${option.replace(/\s+/g, '_')}`;
-            
-            const checkboxLabel = document.createElement('label');
-            checkboxLabel.htmlFor = checkboxInput.id;
-            checkboxLabel.textContent = option;
-            
-            optionItem.appendChild(checkboxInput);
-            optionItem.appendChild(checkboxLabel);
-            optionGroup.appendChild(optionItem);
-        });
-        
-        fieldDiv.appendChild(label);
-        fieldDiv.appendChild(optionGroup);
-    }
-    break;  
-               // Update the rating field generation in the form display
-case 'rating':
-    // Create star rating input
-    const ratingContainer = document.createElement('div');
-    ratingContainer.className = 'rating-container';
-    
-    // Add description if available
-    if (field.description) {
-        const desc = document.createElement('p');
-        desc.textContent = field.description;
-        desc.style.margin = '5px 0';
-        desc.style.color = '#666';
-        ratingContainer.appendChild(desc);
-    }
-    
-    const maxRating = field.max || 5;
-    const starsContainer = document.createElement('div');
-    starsContainer.className = 'stars-container';
-    starsContainer.style.display = 'flex';
-    starsContainer.style.gap = '5px';
-    
-    // Create stars
-    for (let i = 1; i <= maxRating; i++) {
-        const starInput = document.createElement('input');
-        starInput.type = 'radio';
-        starInput.name = field.id;
-        starInput.value = i;
-        starInput.id = `${field.id}_${i}`;
-        starInput.style.display = 'none';
-        
-        const starLabel = document.createElement('label');
-        starLabel.htmlFor = starInput.id;
-        starLabel.className = 'rating-star';
-        starLabel.textContent = '★';
-        starLabel.style.fontSize = '24px';
-        starLabel.style.color = '#ddd';
-        starLabel.style.cursor = 'pointer';
-        
-        // Hover and selection effects
-        starLabel.addEventListener('mouseover', () => {
-            // Highlight all stars up to this one
-            const stars = starsContainer.querySelectorAll('.rating-star');
-            stars.forEach((star, index) => {
-                if (index < i) {
-                    star.style.color = '#ffcc00';
-                }
-            });
-        });
-        
-        starLabel.addEventListener('mouseout', () => {
-            // Only keep selected stars colored
-            const selected = starsContainer.querySelector('input:checked');
-            const stars = starsContainer.querySelectorAll('.rating-star');
-            
-            stars.forEach((star, index) => {
-                if (!selected || index >= parseInt(selected.value)) {
-                    star.style.color = '#ddd';
-                }
-            });
-        });
-        
-        starLabel.addEventListener('click', () => {
-            // Keep selected stars colored
-            const stars = starsContainer.querySelectorAll('.rating-star');
-            stars.forEach((star, index) => {
-                star.style.color = index < i ? '#ffcc00' : '#ddd';
-            });
-        });
-        
-        starsContainer.appendChild(starInput);
-        starsContainer.appendChild(starLabel);
-    }
-    
-    ratingContainer.appendChild(starsContainer);
-    fieldDiv.appendChild(label);
-    fieldDiv.appendChild(ratingContainer);
-    break;   
-    
- case 'linearscale':
-case 'range':
-    // Create linear scale input
-    const scaleContainer = document.createElement('div');
-    
-    const scaleInput = document.createElement('input');
-    scaleInput.type = 'range';
-    scaleInput.name = field.id;
-    scaleInput.min = field.min || 1;
-    scaleInput.max = field.max || 5;
-    scaleInput.step = field.step || 1;
-    scaleInput.style.width = '100%';
-    scaleInput.style.margin = '10px 0';
-    
-    // Add placeholder text if available
-    if (field.placeholder) {
-        const placeholder = document.createElement('p');
-        placeholder.textContent = field.placeholder;
-        placeholder.style.margin = '5px 0';
-        placeholder.style.color = '#666';
-        scaleContainer.appendChild(placeholder);
-    }
-    
-    const scaleLabels = document.createElement('div');
-    scaleLabels.style.display = 'flex';
-    scaleLabels.style.justifyContent = 'space-between';
-    
-    const minLabel = document.createElement('span');
-    minLabel.textContent = field.minLabel || scaleInput.min;
-    
-    const maxLabel = document.createElement('span');
-    maxLabel.textContent = field.maxLabel || scaleInput.max;
-    
-    scaleLabels.appendChild(minLabel);
-    scaleLabels.appendChild(maxLabel);
-    
-    scaleContainer.appendChild(scaleInput);
-    scaleContainer.appendChild(scaleLabels);
-    fieldDiv.appendChild(scaleContainer);
-    break;              
-                default:
-                    input = document.createElement('input');
-                    input.type = 'text';
-                    input.name = field.id;
-                    input.required = field.required || false;
-            }
-            
-            if (input) {
-                fieldDiv.appendChild(label);
-                fieldDiv.appendChild(input);
-            }
-            
-            formFields.appendChild(fieldDiv);
-        });
 
-document.getElementById('responseForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const responses = [];
-  const formFields = document.querySelectorAll('.form-field');
-  
-  formFields.forEach(fieldDiv => {
-    const fieldId = fieldDiv.dataset.fieldId;
-    const field = form.fields.find(f => f.id === fieldId);
-    if (!field) return;
-
-    let value;
-    
-    switch(field.type) {
-      case 'checkbox':
-        value = Array.from(fieldDiv.querySelectorAll('input[type="checkbox"]:checked'))
-                   .map(cb => cb.value);
-        break;
-        
-      case 'radio':
-        const selectedRadio = fieldDiv.querySelector('input[type="radio"]:checked');
-        value = selectedRadio ? selectedRadio.value : null;
-        break;
-        
-      case 'dropdown':
-        const select = fieldDiv.querySelector('select');
-        value = select ? select.value : null;
-        break;
-        
-      default:
-        const input = fieldDiv.querySelector('input, textarea, select');
-        value = input ? input.value : null;
-    }
-    
-    if (value !== null && value !== '' && !(Array.isArray(value) && value.length === 0)) {
-      responses.push({
-        fieldId,
-        value
-      });
-    }
-  });
+<!-- <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const formId = urlParams.get('shared_form') || urlParams.get('id');
+  if (!formId) {
+    document.getElementById('formTitle').textContent = 'Form not found';
+    return;
+  }
 
   try {
-    const response = await fetch(`http://localhost:5000/api/responses/${formId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ responses })
+      const response = await fetch(`http://localhost:5000/api/forms/${formId}/public`);
+    if (!response.ok) throw new Error('Form not found or not published');
+    
+    const { data: form } = await response.json();
+    document.getElementById('formTitle').textContent = form.title;
+    
+    if (form.description) {
+      document.getElementById('formDescription').textContent = form.description;
+    }
+
+    // Render form fields
+    const formFields = document.getElementById('formFields');
+    form.fields.forEach((field) => {
+      const fieldDiv = document.createElement('div');
+      fieldDiv.className = 'form-field';
+      fieldDiv.dataset.fieldId = field.id; // Store field ID in data attribute
+
+      const label = document.createElement('label');
+      label.textContent = field.label || `Field ${field.id}`;
+      
+      if (field.required) {
+        const span = document.createElement('span');
+        span.className = 'required';
+        span.textContent = ' *';
+        label.appendChild(span);
+      }
+
+      let input;
+
+      switch(field.type) {
+        case 'text':
+        case 'email':
+        case 'number':
+        case 'date':
+        case 'time':
+          input = document.createElement('input');
+          input.type = field.type;
+          input.name = field.id;
+          input.required = field.required || false;
+          if (field.placeholder) input.placeholder = field.placeholder;
+          if (field.min) input.min = field.min;
+          if (field.max) input.max = field.max;
+          break;
+          
+        case 'textarea':
+          input = document.createElement('textarea');
+          input.name = field.id;
+          input.required = field.required || false;
+          if (field.placeholder) input.placeholder = field.placeholder;
+          break;
+          
+        case 'dropdown':
+          input = document.createElement('select');
+          input.name = field.id;
+          input.required = field.required || false;
+          
+          // Add default empty option
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.textContent = '-- Select --';
+          defaultOption.selected = true;
+          defaultOption.disabled = true;
+          input.appendChild(defaultOption);
+          
+          // Add other options
+          if (field.options) {
+            field.options.forEach(option => {
+              const optionElement = document.createElement('option');
+              optionElement.value = option;
+              optionElement.textContent = option;
+              input.appendChild(optionElement);
+            });
+          }
+          break;
+          
+        case 'radio':
+          if (field.options) {
+            const optionGroup = document.createElement('div');
+            optionGroup.className = 'option-group';
+            
+            field.options.forEach(option => {
+              const optionItem = document.createElement('div');
+              optionItem.className = 'option-item';
+              
+              const radioInput = document.createElement('input');
+              radioInput.type = 'radio';
+              radioInput.name = field.id;
+              radioInput.value = option;
+              radioInput.id = `${field.id}_${option.replace(/\s+/g, '_')}`;
+              radioInput.required = field.required || false;
+              
+              const radioLabel = document.createElement('label');
+              radioLabel.htmlFor = radioInput.id;
+              radioLabel.textContent = option;
+              
+              optionItem.appendChild(radioInput);
+              optionItem.appendChild(radioLabel);
+              optionGroup.appendChild(optionItem);
+            });
+            
+            fieldDiv.appendChild(label);
+            fieldDiv.appendChild(optionGroup);
+          }
+          break;
+          
+        case 'checkbox':
+          if (field.options) {
+            const optionGroup = document.createElement('div');
+            optionGroup.className = 'option-group';
+            
+            field.options.forEach(option => {
+              const optionItem = document.createElement('div');
+              optionItem.className = 'option-item';
+              
+              const checkboxInput = document.createElement('input');
+              checkboxInput.type = 'checkbox';
+              checkboxInput.name = `${field.id}[]`;
+              checkboxInput.value = option;
+              checkboxInput.id = `${field.id}_${option.replace(/\s+/g, '_')}`;
+              
+              const checkboxLabel = document.createElement('label');
+              checkboxLabel.htmlFor = checkboxInput.id;
+              checkboxLabel.textContent = option;
+              
+              optionItem.appendChild(checkboxInput);
+              optionItem.appendChild(checkboxLabel);
+              optionGroup.appendChild(optionItem);
+            });
+            
+            fieldDiv.appendChild(label);
+            fieldDiv.appendChild(optionGroup);
+          }
+          break;
+          
+        case 'rating':
+          // Create star rating input
+          const ratingContainer = document.createElement('div');
+          ratingContainer.className = 'rating-container';
+          
+          const maxRating = field.max || 5;
+          const starsContainer = document.createElement('div');
+          starsContainer.className = 'stars-container';
+          
+          // Create stars
+          for (let i = 1; i <= maxRating; i++) {
+            const starInput = document.createElement('input');
+            starInput.type = 'radio';
+            starInput.name = field.id;
+            starInput.value = i;
+            starInput.id = `${field.id}_${i}`;
+            starInput.style.display = 'none';
+            
+            const starLabel = document.createElement('label');
+            starLabel.htmlFor = starInput.id;
+            starLabel.className = 'rating-star';
+            starLabel.textContent = '★';
+            
+            starLabel.addEventListener('click', () => {
+              // Keep selected stars colored
+              const stars = starsContainer.querySelectorAll('.rating-star');
+              stars.forEach((star, index) => {
+                star.style.color = index < i ? '#ffcc00' : '#ddd';
+              });
+            });
+            
+            starsContainer.appendChild(starInput);
+            starsContainer.appendChild(starLabel);
+          }
+          
+          ratingContainer.appendChild(starsContainer);
+          fieldDiv.appendChild(label);
+          fieldDiv.appendChild(ratingContainer);
+          break;
+          
+        case 'range':
+          // Create linear scale input
+          const scaleContainer = document.createElement('div');
+          const scaleInput = document.createElement('input');
+          scaleInput.type = 'range';
+          scaleInput.name = field.id;
+          scaleInput.min = field.min || 1;
+          scaleInput.max = field.max || 5;
+          scaleInput.step = field.step || 1;
+          
+          const scaleLabels = document.createElement('div');
+          scaleLabels.style.display = 'flex';
+          scaleLabels.style.justifyContent = 'space-between';
+          
+          const minLabel = document.createElement('span');
+          minLabel.textContent = field.minLabel || scaleInput.min;
+          
+          const maxLabel = document.createElement('span');
+          maxLabel.textContent = field.maxLabel || scaleInput.max;
+          
+          scaleLabels.appendChild(minLabel);
+          scaleLabels.appendChild(maxLabel);
+          scaleContainer.appendChild(scaleInput);
+          scaleContainer.appendChild(scaleLabels);
+          
+          fieldDiv.appendChild(label);
+          fieldDiv.appendChild(scaleContainer);
+          break;
+          
+        default:
+          input = document.createElement('input');
+          input.type = 'text';
+          input.name = field.id;
+          input.required = field.required || false;
+      }
+
+      if (input) {
+        fieldDiv.appendChild(label);
+        fieldDiv.appendChild(input);
+      }
+      
+      formFields.appendChild(fieldDiv);
     });
-    
-    if (!response.ok) throw new Error('Submission failed');
-    
-    document.getElementById('responseForm').style.display = 'none';
-    document.getElementById('thankYou').style.display = 'block';
+
+    document.getElementById('responseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const responses = [];
+      const formFields = document.querySelectorAll('.form-field');
+      
+      formFields.forEach(fieldDiv => {
+        const fieldId = fieldDiv.dataset.fieldId;
+        const field = form.fields.find(f => f.id === fieldId);
+        if (!field) return;
+        
+        let value;
+        
+        switch(field.type) {
+          case 'checkbox':
+            value = Array.from(fieldDiv.querySelectorAll('input[type="checkbox"]:checked'))
+                       .map(cb => cb.value);
+            break;
+            
+          case 'radio':
+            const selectedRadio = fieldDiv.querySelector('input[type="radio"]:checked');
+            value = selectedRadio ? selectedRadio.value : null;
+            break;
+            
+          case 'dropdown':
+            const select = fieldDiv.querySelector('select');
+            value = select ? select.value : null;
+            break;
+            
+          default:
+            const input = fieldDiv.querySelector('input, textarea, select');
+            value = input ? input.value : null;
+        }
+        
+        if (value !== null && value !== '' && !(Array.isArray(value) && value.length === 0)) {
+          responses.push({
+            fieldId,
+            value
+          });
+        }
+      });
+
+      try {
+        const response = await fetch(`http://localhost:5000/api/responses/${formId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ responses })
+        });
+
+        if (!response.ok) throw new Error('Submission failed');
+        
+        document.getElementById('responseForm').style.display = 'none';
+        document.getElementById('thankYou').style.display = 'block';
+        
+      } catch (error) {
+        document.getElementById('errorMessage').textContent = 'Error: ' + error.message;
+        document.getElementById('errorMessage').style.display = 'block';
+      }
+    });
+
   } catch (error) {
-    document.getElementById('errorMessage').textContent = 'Error: ' + error.message;
+    document.getElementById('formTitle').textContent = 'Error loading form';
+    document.getElementById('errorMessage').textContent = error.message;
     document.getElementById('errorMessage').style.display = 'block';
+    console.error('Form loading error:', error);
   }
 });
+</script> -->
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const formId = urlParams.get('shared_form') || urlParams.get('id');
+        
+        if (!formId) {
+            document.getElementById('formTitle').textContent = 'Form not found';
+            return;
+        }
 
-    } catch (error) {
-        document.getElementById('formTitle').textContent = 'Error loading form';
-        document.getElementById('errorMessage').textContent = error.message;
-        document.getElementById('errorMessage').style.display = 'block';
-        console.error('Form loading error:', error);
-    }
-});
+        try {
+            const response = await fetch(`http://localhost:5000/api/forms/public/${formId}`);
+            if (!response.ok) throw new Error('Form not found or not published');
+            
+            const { data: form } = await response.json();
+            document.getElementById('formTitle').textContent = form.title;
+            
+            if (form.description) {
+                document.getElementById('formDescription').textContent = form.description;
+            }
+
+            // Render form fields
+            const formFields = document.getElementById('formFields');
+            form.fields.forEach((field) => {
+                const fieldDiv = document.createElement('div');
+                fieldDiv.className = 'form-field';
+                fieldDiv.dataset.fieldId = field.id;
+                fieldDiv.dataset.fieldType = field.type;
+
+                const label = document.createElement('label');
+                label.textContent = field.label || `Field ${field.id}`;
+                
+                if (field.required) {
+                    const span = document.createElement('span');
+                    span.className = 'required';
+                    span.textContent = ' *';
+                    label.appendChild(span);
+                }
+
+                fieldDiv.appendChild(label);
+
+                // Create input based on field type
+                switch(field.type) {
+                    case 'text':
+                    case 'email':
+                    case 'number':
+                    case 'date':
+                    case 'time':
+                        const input = document.createElement('input');
+                        input.type = field.type;
+                        input.name = field.id;
+                        input.required = field.required || false;
+                        if (field.placeholder) input.placeholder = field.placeholder;
+                        if (field.min) input.min = field.min;
+                        if (field.max) input.max = field.max;
+                        fieldDiv.appendChild(input);
+                        break;
+                        
+                    case 'textarea':
+                        const textarea = document.createElement('textarea');
+                        textarea.name = field.id;
+                        textarea.required = field.required || false;
+                        if (field.placeholder) textarea.placeholder = field.placeholder;
+                        fieldDiv.appendChild(textarea);
+                        break;
+                        
+                    case 'dropdown':
+                        const select = document.createElement('select');
+                        select.name = field.id;
+                        select.required = field.required || false;
+                        
+                        // Add default empty option
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = '-- Select --';
+                        defaultOption.selected = true;
+                        defaultOption.disabled = true;
+                        select.appendChild(defaultOption);
+                        
+                        // Add other options
+                        if (field.options) {
+                            field.options.forEach(option => {
+                                const optionElement = document.createElement('option');
+                                optionElement.value = option;
+                                optionElement.textContent = option;
+                                select.appendChild(optionElement);
+                            });
+                        }
+                        fieldDiv.appendChild(select);
+                        break;
+                        
+                    case 'radio':
+                        if (field.options) {
+                            field.options.forEach(option => {
+                                const optionDiv = document.createElement('div');
+                                optionDiv.className = 'option-item';
+                                
+                                const radioInput = document.createElement('input');
+                                radioInput.type = 'radio';
+                                radioInput.name = field.id;
+                                radioInput.value = option;
+                                radioInput.id = `${field.id}_${option.replace(/\s+/g, '_')}`;
+                                radioInput.required = field.required || false;
+                                
+                                const radioLabel = document.createElement('label');
+                                radioLabel.htmlFor = radioInput.id;
+                                radioLabel.textContent = option;
+                                
+                                optionDiv.appendChild(radioInput);
+                                optionDiv.appendChild(radioLabel);
+                                fieldDiv.appendChild(optionDiv);
+                            });
+                        }
+                        break;
+                        
+                    case 'checkbox':
+                        if (field.options) {
+                            field.options.forEach(option => {
+                                const optionDiv = document.createElement('div');
+                                optionDiv.className = 'option-item';
+                                
+                                const checkboxInput = document.createElement('input');
+                                checkboxInput.type = 'checkbox';
+                                checkboxInput.name = `${field.id}[]`;
+                                checkboxInput.value = option;
+                                checkboxInput.id = `${field.id}_${option.replace(/\s+/g, '_')}`;
+                                
+                                const checkboxLabel = document.createElement('label');
+                                checkboxLabel.htmlFor = checkboxInput.id;
+                                checkboxLabel.textContent = option;
+                                
+                                optionDiv.appendChild(checkboxInput);
+                                optionDiv.appendChild(checkboxLabel);
+                                fieldDiv.appendChild(optionDiv);
+                            });
+                        }
+                        break;
+                        
+                    case 'rating':
+                        const ratingContainer = document.createElement('div');
+                        ratingContainer.className = 'rating-container';
+                        
+                        const maxRating = field.max || 5;
+                        const starsContainer = document.createElement('div');
+                        starsContainer.className = 'stars-container';
+                        
+                        for (let i = 1; i <= maxRating; i++) {
+                            const starInput = document.createElement('input');
+                            starInput.type = 'radio';
+                            starInput.name = field.id;
+                            starInput.value = i;
+                            starInput.id = `${field.id}_${i}`;
+                            starInput.style.display = 'none';
+                            
+                            const starLabel = document.createElement('label');
+                            starLabel.htmlFor = starInput.id;
+                            starLabel.className = 'rating-star';
+                            starLabel.textContent = '★';
+                            
+                            starLabel.addEventListener('click', () => {
+                                // Color selected stars
+                                const stars = starsContainer.querySelectorAll('.rating-star');
+                                stars.forEach((star, index) => {
+                                    star.style.color = index < i ? '#ffcc00' : '#ddd';
+                                });
+                            });
+                            
+                            starsContainer.appendChild(starInput);
+                            starsContainer.appendChild(starLabel);
+                        }
+                        
+                        ratingContainer.appendChild(starsContainer);
+                        fieldDiv.appendChild(ratingContainer);
+                        break;
+                        
+                    case 'range':
+                        const rangeContainer = document.createElement('div');
+                        rangeContainer.className = 'linear-scale-container';
+                        
+                        const rangeInput = document.createElement('input');
+                        rangeInput.type = 'range';
+                        rangeInput.name = field.id;
+                        rangeInput.min = field.min || 1;
+                        rangeInput.max = field.max || 5;
+                        rangeInput.step = field.step || 1;
+                        rangeInput.value = Math.floor((field.min + field.max) / 2);
+                        
+                        const rangeLabels = document.createElement('div');
+                        rangeLabels.className = 'linear-scale-labels';
+                        rangeLabels.innerHTML = `
+                            <span>${field.minLabel || field.min || 1}</span>
+                            <span>${field.maxLabel || field.max || 5}</span>
+                        `;
+                        
+                        rangeContainer.appendChild(rangeInput);
+                        rangeContainer.appendChild(rangeLabels);
+                        fieldDiv.appendChild(rangeContainer);
+                        break;
+                        
+                    default:
+                        const defaultInput = document.createElement('input');
+                        defaultInput.type = 'text';
+                        defaultInput.name = field.id;
+                        defaultInput.required = field.required || false;
+                        fieldDiv.appendChild(defaultInput);
+                }
+                
+                formFields.appendChild(fieldDiv);
+            });
+
+            // Single submit handler
+            document.getElementById('responseForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const responses = [];
+                let hasErrors = false;
+                
+                // Clear previous errors
+                document.querySelectorAll('.field-error').forEach(el => el.remove());
+                
+                // Collect responses
+                document.querySelectorAll('.form-field').forEach(fieldDiv => {
+                    const fieldId = fieldDiv.dataset.fieldId;
+                    const fieldType = fieldDiv.dataset.fieldType;
+                    const field = form.fields.find(f => f.id === fieldId);
+                    if (!field) return;
+                    
+                    let value = null;
+                    let isValid = true;
+                    
+                    try {
+                        switch(fieldType) {
+                            case 'checkbox':
+                                const checkboxes = fieldDiv.querySelectorAll(`input[type="checkbox"]:checked`);
+                                value = Array.from(checkboxes).map(cb => cb.value);
+                                break;
+                                
+                            case 'radio':
+                                const selectedRadio = fieldDiv.querySelector(`input[type="radio"]:checked`);
+                                value = selectedRadio ? selectedRadio.value : null;
+                                break;
+                                
+                            case 'dropdown':
+                                const select = fieldDiv.querySelector('select');
+                                value = select.value;
+                                break;
+                                
+                            case 'rating':
+                                const selectedStar = fieldDiv.querySelector(`input[type="radio"]:checked`);
+                                value = selectedStar ? selectedStar.value : null;
+                                break;
+                                
+                            case 'range':
+                                const range = fieldDiv.querySelector('input[type="range"]');
+                                value = range.value;
+                                break;
+                                
+                            default:
+                                const input = fieldDiv.querySelector('input, textarea, select');
+                                value = input.value;
+                        }
+                        
+                        // Validate required fields
+                        if (field.required) {
+                            if (
+                                value === null || 
+                                value === '' || 
+                                value === undefined || 
+                                (Array.isArray(value) && value.length === 0)
+                            ) {
+                                throw new Error('This field is required');
+                            }
+                        }
+                        
+                        responses.push({
+                            fieldId,
+                            value
+                        });
+                        
+                    } catch (error) {
+                        hasErrors = true;
+                        const errorEl = document.createElement('div');
+                        errorEl.className = 'field-error';
+                        errorEl.style.color = 'red';
+                        errorEl.style.marginTop = '5px';
+                        errorEl.textContent = error.message;
+                        fieldDiv.appendChild(errorEl);
+                    }
+                });
+                
+                if (hasErrors) {
+                    document.getElementById('errorMessage').textContent = 'Please fix the errors in the form';
+                    document.getElementById('errorMessage').style.display = 'block';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:5000/api/responses/${formId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ responses })
+                    });
+
+                    if (response.ok) {
+                        document.getElementById('responseForm').style.display = 'none';
+                        document.getElementById('thankYou').style.display = 'block';
+                    } else {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Submission failed');
+                    }
+                } catch (error) {
+                    document.getElementById('errorMessage').textContent = 'Error: ' + error.message;
+                    document.getElementById('errorMessage').style.display = 'block';
+                }
+            });
+
+        } catch (error) {
+            document.getElementById('formTitle').textContent = 'Error loading form';
+            document.getElementById('errorMessage').textContent = error.message;
+            document.getElementById('errorMessage').style.display = 'block';
+            console.error('Form loading error:', error);
+        }
+    });
 </script>
 </body>
+
 </html>

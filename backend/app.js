@@ -9,10 +9,46 @@ const bodyParser = require('body-parser');
 const formRoutes = require('./routes/formRoutes');
 const responseRoutes=require("./routes/responseRoutes");
 const adminRoutes = require('./routes/adminRoutes');
+const User = require('./models/User');
+const Form = require('./models/Form');
+
 dotenv.config();
 
-connectDB();
 
+async function initializeTemplates() {
+  try {
+    const ADMIN_EMAILS = ['admin1@gmail.com', 'admin2@gmail.com'];
+    const adminUser = await User.findOne({ email: { $in: ADMIN_EMAILS } });
+    
+    if (!adminUser) {
+      console.log('No admin user found. Skipping template initialization');
+      return;
+    }
+
+    const templateCount = await Form.countDocuments({ isTemplate: true });
+    if (templateCount === 0) {
+      const seedTemplates = require('./seeders/templateSeeder');
+      await seedTemplates();
+      console.log('Templates seeded successfully');
+    }
+  } catch (error) {
+    console.error('Template initialization error:', error);
+  }
+}
+
+
+// Change the connection handler to:
+connectDB().then(async () => {
+  console.log('Database connected, initializing templates...');
+  try {
+    await initializeTemplates();
+  } catch (err) {
+    console.error('Template initialization failed:', err);
+  }
+}).catch(err => {
+  console.error('Database connection failed:', err);
+  process.exit(1);
+});
 
 const app = express();
 
@@ -24,7 +60,14 @@ app.use(cors({
 }));
 
 
-
+app.get('/api/seed-templates', async (req, res) => {
+    try {
+        await seedTemplates();
+        res.status(200).json({ success: true, message: 'Templates seeded successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 app.use(express.json());
 
@@ -35,20 +78,37 @@ app.use('/api/auth', authRoutes);
 app.use('/api/forms', formRoutes);
 app.use("/api/responses",responseRoutes);
 app.use('/api/admin', adminRoutes);
-app.use((err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
 
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message
-  });
+
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || 'error';
+    
+    // Log the error for debugging
+    console.error('Error:', err.message, err.stack);
+    
+    // Send detailed error in development
+    if (process.env.NODE_ENV === 'development') {
+        res.status(err.statusCode).json({
+            status: err.status,
+            message: err.message,
+            error: err,
+            stack: err.stack
+        });
+    } else {
+        // Send simplified error in production
+        res.status(err.statusCode).json({
+            status: err.status,
+            message: err.message
+        });
+    }
 });
 
 app.use((req, res, next) => {
   console.log(`Incoming ${req.method} request to ${req.originalUrl}`);
   next();
 });
+
 
 
 // Update the /save-form endpoint
@@ -84,6 +144,34 @@ app.get('/load-form/:id', (req, res) => {
 app.get('/api/test', (req, res) => {
   console.log('Test route hit');
   res.json({ message: 'Backend is working!' });
+});
+
+// app.js - Add this after all routes
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    
+    // Mongoose validation error
+    if (err.name === 'ValidationError') {
+        const messages = Object.values(err.errors).map(val => val.message);
+        return res.status(400).json({
+            success: false,
+            error: messages
+        });
+    }
+    
+    // JWT error
+    if (err.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+            success: false,
+            error: 'Invalid token'
+        });
+    }
+    
+    // Default error handling
+    res.status(err.statusCode || 500).json({
+        success: false,
+        error: err.message || 'Server Error'
+    });
 });
 const PORT = process.env.PORT || 5000;
 

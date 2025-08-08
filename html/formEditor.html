@@ -12,6 +12,58 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        /* Add to existing styles */
+#questionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.questionBlock {
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  padding: 20px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+#form-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+#icons {
+  display: flex;
+  gap: 10px;
+}
+
+#icons i {
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+#icons i:hover {
+  color: #4361ee;
+}
+
+#addContent {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px dashed #ddd;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
         body {
             background-color: #f5f5f5;
@@ -502,78 +554,116 @@
     </main>
 
     <script>
-       
+      
         let currentFormId = null;
         let formStates = [];
         let currentStateIndex = -1;
         let isResponseMode = false;
 
-       document.addEventListener('DOMContentLoaded', async () => {
-    const token =
-    localStorage.getItem('token');
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('token');
     const urlParams = new URLSearchParams(window.location.search);
-     const templateId = urlParams.get('template');
+    const templateId = urlParams.get('template');
+    const formId = urlParams.get('id');
 
-          if (templateId) {
+    if (templateId) {
         try {
-            const response = await fetch(`http://localhost:5000/api/admin/templates/${templateId}`);
+            const response = await fetch(`http://localhost:5000/api/forms/templates/${templateId}`, {
+            headers: localStorage.getItem('token') ? {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            } : {}
+        });
+            
             if (!response.ok) throw new Error('Template not found');
             
             const { data: template } = await response.json();
             loadFormData(template);
-            
-            // Update form title to indicate it's a new form based on template
-            document.querySelector('.form-header h1').textContent = `Copy of ${template.title}`;
-            currentFormId = null; // This will be a new form
         } catch (error) {
             console.error('Error loading template:', error);
             alert('Error loading template: ' + error.message);
         }
     }
-    document.getElementById('buttonsHeader').querySelector('button:nth-child(4)').addEventListener('click', saveForm);
-    const sharedFormId = urlParams.get('shared_form');
     
-    if (sharedFormId) {
-        isResponseMode = true;
-        await loadSharedForm(sharedFormId);
-    } else {
-        if (!token) {
-            window.location.href = 'signin.html';
-            return;
-        }
-
-        currentFormId = urlParams.get('id');
-        
-        if (currentFormId) {
-            try {
-                const response = await fetch(`http://localhost:5000/api/forms/${currentFormId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (response.ok) {
-                    const { data: form } = await response.json();
-                    loadFormData(form);
-                    updatePublishButton(form.isPublished);
-                } else {
-                    throw new Error('Failed to load form');
-                }
-            } catch (error) {
-                console.error('Error loading form:', error);
-                alert('Error loading form: ' + error.message);
-            }
-        } else {
-            initializeFormStates();
-        }
+  const sharedFormId = urlParams.get('shared_form');
+  if (sharedFormId) {
+    isResponseMode = true;
+    await loadSharedForm(sharedFormId);
+  } else {
+    if (!token) {
+      window.location.href = 'signin.html';
+      return;
     }
-    
-    setupEventListeners();
-    document.getElementById('publishBtn').addEventListener('click', publishForm);
-    document.getElementById('shareBtn').addEventListener('click', shareForm);
+
+    currentFormId = urlParams.get('id');
+    if (currentFormId) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/forms/${currentFormId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const { data: form } = await response.json();
+          loadFormData(form);
+          updatePublishButton(form.isPublished);
+        } else {
+          throw new Error('Failed to load form');
+        }
+      } catch (error) {
+        console.error('Error loading form:', error);
+        alert('Error loading form: ' + error.message);
+      }
+    } else {
+      initializeFormStates();
+    }
+  }
+
+  setupEventListeners();
+  document.getElementById('publishBtn').addEventListener('click', publishForm);
+  document.getElementById('shareBtn').addEventListener('click', shareForm);
 });
 
-   async function shareForm() {
+// In formEditor.html script
+async function loadTemplate(templateId) {
+    try {
+        const response = await fetch(`http://localhost:5000/api/forms/templates/${templateId}`, {
+            headers: localStorage.getItem('token') ? {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            } : {}
+        });
+        
+        if (!response.ok) throw new Error('Template not found');
+        
+        const { data: template } = await response.json();
+        loadFormData(template);
+    } catch (error) {
+        console.error('Error loading template:', error);
+        alert('Error loading template: ' + error.message);
+    }
+}
+
+function loadFormData(form) {
+    document.querySelector('.form-header h1').textContent = form.title;
+    document.querySelector('.form-header p').textContent = form.description || '';
+    
+    const questionsContainer = document.getElementById('questionsContainer');
+    questionsContainer.innerHTML = '';
+    
+    // Ensure fields exist and are an array
+    if (form.fields && Array.isArray(form.fields)) {
+        form.fields.forEach(field => {
+            addFormField(field);
+        });
+    }
+    
+    // Initialize form states
+    if (!isResponseMode) {
+        initializeFormStates();
+    }
+}
+ 
+async function shareForm() {
     if (!currentFormId) {
         const saved = await saveForm();
         if (!saved) {
@@ -583,35 +673,22 @@
     }
 
     try {
-        // First check if the form is published
-        const formResponse = await fetch(`http://localhost:5000/api/forms/${currentFormId}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!formResponse.ok) {
-            throw new Error('Failed to fetch form details');
-        }
-        
-        const { data: form } = await formResponse.json();
-        
-        if (!form.isPublished) {
-            alert('Please publish the form first before sharing');
-            return;
-        }
-        
-        // Generate the correct public URL
-        const publicUrl = `${window.location.origin}/form.html?id=${currentFormId}`;
-        showShareDialog(publicUrl);
+        // First publish the form if not published
+        const published = await publishForm();
+        if (!published) return;
+
+         const publicUrl = `${window.location.origin}/form.html?shared_form=${currentFormId}`;
+    showShareDialog(publicUrl);
     } catch (error) {
         console.error('Error sharing form:', error);
         alert('Error sharing form: ' + error.message);
     }
 }
+
 async function loadSharedForm(formId) {
             try {
-                const response = await fetch(`http://localhost:5000/api/forms/${formId}/view`);
+              
+const response = await fetch(`http://localhost:5000/api/forms/${formId}/public`);
                 
                 if (response.ok) {
                     const { data: form } = await response.json();
@@ -712,105 +789,98 @@ function showAddQuestionPanel() {
             document.getElementById('addContent').style.display = 'none';
             document.querySelector('.add-question-btn').style.display = 'flex';
         }
+       
+     function addFormField(field) {
+  const questionsContainer = document.getElementById('questionsContainer');
+  const newQuestionBlock = document.createElement("div");
+  newQuestionBlock.className = "questionBlock";
 
-        function loadFormData(form) {
-          
-            document.querySelector('.form-header h1').textContent = form.title;
-            document.querySelector('.form-header p').textContent = form.description;
-            
-        
-            const questionsContainer = document.getElementById('questionsContainer');
-            questionsContainer.innerHTML = '';
-            
-        
-            form.fields.forEach(field => {
-                addFormField(field);
-            });
-            
-            
-            if (isResponseMode) {
-                const submitButton = document.createElement('button');
-                submitButton.type = 'submit';
-                submitButton.textContent = 'Submit';
-                questionsContainer.appendChild(submitButton);
-            }
-            
-           
-            if (!isResponseMode) {
-                initializeFormStates();
-            }
-        }
+  let inputHTML = '';
+  const fieldId = field.id || field.label.toLowerCase().replace(/\s+/g, '-');
 
-        function addFormField(field) {
-            const questionsContainer = document.getElementById('questionsContainer');
-            const newQuestionBlock = document.createElement("div");
-            newQuestionBlock.className = "questionBlock";
-            
-            let inputHTML = '';
-            const fieldId = field.id || field.label.toLowerCase().replace(/\s+/g, '-');
-            
-            switch(field.type) {
-                case 'text':
-                case 'email':
-                case 'number':
-                case 'date':
-                case 'time':
-                    inputHTML = `
-                        <input type="${field.type}" 
-                               id="${fieldId}" 
-                               name="${fieldId}"
-                               ${field.required ? 'required' : ''}
-                               ${field.placeholder ? `placeholder="${field.placeholder}"` : ''}
-                               ${field.min ? `min="${field.min}"` : ''}
-                               ${field.max ? `max="${field.max}"` : ''}>
-                    `;
-                    break;
-                case 'textarea':
-                    inputHTML = `
-                        <textarea id="${fieldId}" 
-                                  name="${fieldId}"
-                                  ${field.required ? 'required' : ''}
-                                  ${field.placeholder ? `placeholder="${field.placeholder}"` : ''}></textarea>
-                    `;
-                    break;
-                case 'radio':
-                case 'checkbox':
-                    inputHTML = generateOptions(field);
-                    break;
-                case 'select':
-                    inputHTML = generateSelect(field);
-                    break;
-                case 'rating':
-                    inputHTML = generateRating(field);
-                    break;
-                default:
-                    inputHTML = `<input type="text" id="${fieldId}" name="${fieldId}" ${field.required ? 'required' : ''}>`;
-            }
-        
-            if (isResponseMode) {
-                newQuestionBlock.innerHTML = `
-                    <div id="form-group">
-                        <label>${field.label} ${field.required ? '<span style="color:red">*</span>' : ''}</label>
-                    </div>
-                    ${inputHTML}
-                `;
-            } else {
-                newQuestionBlock.innerHTML = `
-                    <div id="form-group">
-                        <label contenteditable="true">${field.label}</label>
-                        <div id="icons">
-                            <i class="fas fa-plus-circle" onclick="addNewQuestionAfter(event)"></i>
-                            <i class="fas fa-edit" onclick="editElement(event)"></i>
-                            <i class="fas fa-trash" onclick="deleteElement(event)"></i>
-                        </div>
-                    </div>
-                    ${inputHTML}
-                `;
-            }
-            
-            questionsContainer.appendChild(newQuestionBlock);
-        }
+  switch(field.type) {
+    case 'text':
+    case 'email':
+    case 'number':
+    case 'date':
+    case 'time':
+      inputHTML = `
+        <input type="${field.type}"
+               id="${fieldId}"
+               name="${fieldId}"
+               ${field.required ? 'required' : ''}
+               ${field.placeholder ? `placeholder="${field.placeholder}"` : ''}
+               ${field.min ? `min="${field.min}"` : ''}
+               ${field.max ? `max="${field.max}"` : ''}>
+      `;
+      break;
+      
+    case 'textarea':
+      inputHTML = `
+        <textarea id="${fieldId}"
+                  name="${fieldId}"
+                  ${field.required ? 'required' : ''}
+                  ${field.placeholder ? `placeholder="${field.placeholder}"` : ''}></textarea>
+      `;
+      break;
+      
+    case 'radio':
+    case 'checkbox':
+      inputHTML = generateOptions(field);
+      break;
+      
+    case 'dropdown':
+      inputHTML = generateSelect(field);
+      break;
+      
+    case 'rating':
+      inputHTML = generateRating(field);
+      break;
+      
+    case 'range':
+      inputHTML = generateRange(field);
+      break;
+      
+    default:
+      inputHTML = `<input type="text" id="${fieldId}" name="${fieldId}" ${field.required ? 'required' : ''}>`;
+  }
 
+  if (isResponseMode) {
+    newQuestionBlock.innerHTML = `
+      <div id="form-group">
+        <label>${field.label} ${field.required ? '<span style="color:red">*</span>' : ''}</label>
+      </div>
+      ${inputHTML}
+    `;
+  } else {
+    newQuestionBlock.innerHTML = `
+      <div id="form-group">
+        <label contenteditable="true">${field.label}</label>
+        <div id="icons">
+          <i class="fas fa-plus-circle" onclick="addNewQuestionAfter(event)"></i>
+          <i class="fas fa-edit" onclick="editElement(event)"></i>
+          <i class="fas fa-trash" onclick="deleteElement(event)"></i>
+        </div>
+      </div>
+      ${inputHTML}
+    `;
+  }
+
+  questionsContainer.appendChild(newQuestionBlock);
+}
+function generateRange(field) {
+  return `
+    <div class="range-container">
+      <input type="range" id="${field.id}" name="${field.id}"
+             min="${field.min || 1}" max="${field.max || 5}" step="${field.step || 1}"
+             ${field.required ? 'required' : ''}>
+      <div class="range-labels">
+        <span>${field.minLabel || field.min || 1}</span>
+        <span>${field.maxLabel || field.max || 5}</span>
+      </div>
+    </div>
+  `;
+}
         function addNewQuestionAfter(event) {
             const questionBlock = event.target.closest('.questionBlock');
             showAddQuestionPanel();
@@ -1015,8 +1085,13 @@ function displayContent(ele) {
     else if (ele === "Date") {
         inputContainer.innerHTML = `<input type='date' ${isRequired ? 'required' : ''}>`;
     } else if (ele === "Time") {
-        inputContainer.innerHTML = `<input type='time' ${isRequired ? 'required' : ''}>`;
-    } else if (ele === "Rating") {
+    inputContainer.innerHTML = `
+      <input type='text' 
+             placeholder='HH:MM AM/PM' 
+             ${isRequired ? 'required' : ''}
+             pattern="^(1[0-2]|0?[1-9]):[0-5][0-9]\\s?(AM|PM|am|pm)$"
+             title="Enter time in HH:MM AM/PM format">`;
+  }else if (ele === "Rating") {
         const maxRating = prompt("Enter maximum rating (default 5):", "5");
         const ratingCount = parseInt(maxRating) || 5;
         inputContainer.innerHTML = generateRating({
@@ -1221,7 +1296,7 @@ function saveQuestion(event) {
         alert("Please enter a question first");
         return;
     }
-    const fieldId = questionText.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
+     const fieldId = `${questionText.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
     const answerType = document.querySelector("#selected").textContent.trim().replace(' <i class="fas fa-caret-down"></i>', '');
     const inputContainer = document.getElementById("inputContainer");
     const isRequired = document.getElementById("toggleRequired").classList.contains("fa-toggle-on");
@@ -1611,98 +1686,106 @@ async function unpublishForm() {
         }
 
 async function saveForm() {
-    try {
-        // Get form data from contenteditable elements
-        const title = document.querySelector('.form-header h1').textContent;
-        const description = document.querySelector('.form-header p').textContent;
-        
-        const formData = {
-            title: title,
-            description: description,
-            fields: []
-        };
+  try {
+    // Get form data from contenteditable elements
+    const title = document.querySelector('.form-header h1').textContent;
+    const description = document.querySelector('.form-header p').textContent;
+    
+    const formData = {
+      title: title,
+      description: description,
+      fields: []
+    };
 
-        // Collect all form fields from question blocks
-        document.querySelectorAll('.questionBlock').forEach(block => {
-            const label = block.querySelector('label').textContent;
-            const input = block.querySelector('input, textarea, select');
-            
-            if (!input) return;
+    // Collect all form fields from question blocks
+    document.querySelectorAll('.questionBlock').forEach(block => {
+      const label = block.querySelector('label').textContent;
+      const input = block.querySelector('input, textarea, select');
+      if (!input) return;
 
-            const field = {
-    id: input.id || `field_${Date.now()}`,
-    type: input.tagName === 'SELECT' ? 'dropdown' :
-          input.tagName === 'TEXTAREA' ? 'textarea' :
-          input.type || 'text',
-    label: label,
-    required: input.required || false
-};
+      const field = {
+        id: input.id || `field_${Date.now()}`,
+        type: input.tagName === 'SELECT' ? 'dropdown' : 
+              input.tagName === 'TEXTAREA' ? 'textarea' : 
+              input.type || 'text',
+        label: label,
+        required: input.required || false
+      };
 
+      // Handle different field types
+      switch(field.type) {
+        case 'radio':
+        case 'checkbox':
+          field.options = [];
+          block.querySelectorAll(`input[type="${field.type}"]`).forEach(opt => {
+            field.options.push(opt.value || opt.nextElementSibling?.textContent?.trim());
+          });
+          break;
+          
+        case 'dropdown':
+          field.options = [];
+          block.querySelectorAll('option').forEach(opt => {
+            if (opt.value) field.options.push(opt.textContent);
+          });
+          break;
+          
+        case 'range':
+          field.min = input.min || 1;
+          field.max = input.max || 5;
+          field.step = input.step || 1;
+          break;
+          
+        case 'rating':
+          field.max = input.max || 5;
+          break;
+      }
 
-            // Handle different field types
-            switch(field.type) {
-                case 'radio':
-                case 'checkbox':
-                    field.options = [];
-                    block.querySelectorAll(`input[type="${field.type}"]`).forEach(opt => {
-                        field.options.push(opt.value || opt.nextElementSibling?.textContent?.trim());
-                    });
-                    break;
-                    
-                case 'dropdown':
-                    field.options = [];
-                    block.querySelectorAll('option').forEach(opt => {
-                        if (opt.value) field.options.push(opt.textCfontent);
-                    });
-                    break;
-            }
+      formData.fields.push(field);
+    });
 
-            formData.fields.push(field);
-        });
+    const method = currentFormId ? 'PUT' : 'POST';
+    const url = currentFormId 
+      ? `http://localhost:5000/api/forms/${currentFormId}`
+      : 'http://localhost:5000/api/forms';
 
-        const method = currentFormId ? 'PUT' : 'POST';
-        const url = currentFormId 
-            ? `http://localhost:5000/api/forms/${currentFormId}`
-            : 'http://localhost:5000/api/forms';
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(formData)
+    });
 
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(formData)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to save form');
-        }
-
-        const result = await response.json();
-        
-        // If this is a new form, store the ID
-        if (!currentFormId && result.data?._id) {
-            currentFormId = result.data._id;
-            // Update URL to include the new ID
-            window.history.pushState({}, '', `formEditor.html?id=${currentFormId}`);
-        }
-
-        // Show save confirmation
-        const saveBtn = document.querySelector('#buttonsHeader button:nth-child(4)');
-        saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
-        setTimeout(() => {
-            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
-        }, 2000);
-
-        return true;
-    } catch (error) {
-        console.error('Error saving form:', error);
-        alert('Error saving form: ' + error.message);
-        return false;
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to save form');
     }
-}
 
+    const result = await response.json();
+    
+    // If this is a new form, store the ID
+    if (!currentFormId && result.data?._id) {
+      currentFormId = result.data._id;
+      // Update URL to include the new ID
+      window.history.pushState({}, '', `formEditor.html?id=${currentFormId}`);
+    }
+
+    // Show save confirmation
+    const saveBtn = document.querySelector('#buttonsHeader button:nth-child(4)');
+    saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
+    setTimeout(() => {
+      saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+    }, 2000);
+
+    return true;
+
+  } catch (error) {
+    console.error('Error saving form:', error);
+    alert('Error saving form: ' + error.message);
+    return false;
+  }
+}
 function getFormStructure() {
     const title = document.querySelector('.form-header h1')?.textContent || 'Untitled Form';
     const description = document.querySelector('.form-header p')?.textContent || '';
@@ -1856,38 +1939,32 @@ function deleteQuestion() {
 async function submitResponse(formId) {
     try {
         const responses = [];
-        const formFields = document.querySelectorAll('.questionBlock');
         
-        formFields.forEach(fieldDiv => {
-            const input = fieldDiv.querySelector('input, textarea, select');
+        // Collect responses from all fields
+        document.querySelectorAll('.questionBlock').forEach(block => {
+            const input = block.querySelector('input, textarea, select');
             if (!input) return;
             
-            const fieldId = input.id;
+            const fieldId = input.id || input.name;
             let value;
             
             if (input.type === 'checkbox') {
                 // For checkboxes, collect all checked values
-                value = Array.from(fieldDiv.querySelectorAll('input[type="checkbox"]:checked'))
+                value = Array.from(block.querySelectorAll('input[type="checkbox"]:checked'))
                             .map(checkbox => checkbox.value);
             } else if (input.type === 'radio') {
                 // For radio buttons, get selected value
-                const selected = fieldDiv.querySelector('input[type="radio"]:checked');
+                const selected = block.querySelector('input[type="radio"]:checked');
                 value = selected ? selected.value : null;
-            } else if (input.tagName === 'SELECT') {
-                value = input.value;
             } else {
                 value = input.value;
             }
             
             if (value !== null && value !== undefined && value !== '') {
-                responses.push({
-                    fieldId,
-                    value
-                });
+                responses[fieldId] = value;
             }
         });
-
-        const response = await fetch(`http://localhost:5000/api/responses/${formId}`, {
+    const response = await fetch(`http://localhost:5000/api/responses/${formId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1900,15 +1977,18 @@ async function submitResponse(formId) {
             throw new Error(error.message || 'Submission failed');
         }
 
+        // Show thank you message
         document.getElementById('surveyForm').style.display = 'none';
         document.querySelector('.thank-you-message').style.display = 'block';
     } catch (error) {
         console.error('Submission error:', error);
-        document.getElementById('errorMessage').textContent = 'Error submitting form: ' + error.message;
-        document.getElementById('errorMessage').style.display = 'block';
+        alert('Error submitting form: ' + error.message);
     }
 }
-        window.copyToClipboard = function(elementId) {
+       
+
+
+window.copyToClipboard = function(elementId) {
             const input = document.getElementById(elementId);
             input.select();
             document.execCommand('copy');
