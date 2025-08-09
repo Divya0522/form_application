@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Forms | FormCraft</title>
+    <link rel="stylesheet" href="../css/adminDashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo-container">
+                <img src="https://cdn3.iconfinder.com/data/icons/files-7-1/64/50-512.png" alt="FormCraft Logo">
+                <h1>FormCraft</h1>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="adminDashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="adminTemplates.html" class="nav-item">
+                    <i class="fas fa-clone"></i>
+                    <span>Templates</span>
+                </a>
+                <a href="adminUsers.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+                <a href="adminForms.html" class="nav-item active">
+                    <i class="fas fa-file-alt"></i>
+                    <span>All Forms</span>
+                </a>
+                <a href="adminSubmissions.html" class="nav-item">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Submissions</span>
+                </a>
+            </nav>
+            
+            <div class="user-profile">
+                <div class="profile-image">
+                    <img src="../asserts/profile.png" alt="Admin Profile">
+                </div>
+                <div class="profile-info">
+                    <h3 id="adminName">Admin</h3>
+                    <p>Administrator</p>
+                </div>
+                <button class="profile-menu-btn" id="profileMenuBtn">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="dropdown-content" id="profileDropdown">
+                    <a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>All Forms</h1>
+                    <p>View and manage all user-created forms</p>
+                </div>
+            </header>
+
+            <table class="full-width-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Created By</th>
+                        <th>Status</th>
+                        <th>Responses</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody id="formsTableBody">
+                    </tbody>
+            </table>
+            <div id="loadingMessage" class="empty-state">Loading forms...</div>
+            <div id="noDataMessage" class="empty-state" style="display:none;">No forms found.</div>
+        </main>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (!token || !user || user.role !== 'admin') {
+            window.location.href = 'signin.html';
+            return;
+        }
+
+        document.getElementById('adminName').textContent = user.fullName || 'Admin';
+        
+        document.getElementById('profileMenuBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-profile')) {
+                document.getElementById('profileDropdown').style.display = 'none';
+            }
+        });
+
+        document.getElementById('logout').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'signin.html';
+        });
+
+        await loadAllForms();
+    });
+
+    async function loadAllForms() {
+        const formsTableBody = document.getElementById('formsTableBody');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const noDataMessage = document.getElementById('noDataMessage');
+
+        loadingMessage.style.display = 'block';
+        formsTableBody.innerHTML = '';
+        noDataMessage.style.display = 'none';
+
+        try {
+            const response = await fetch('http://localhost:5000/api/admin/forms', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            if (!response.ok) throw new Error('Failed to load forms');
+            
+            const { data: forms } = await response.json();
+            
+            loadingMessage.style.display = 'none';
+
+            if (forms.length === 0) {
+                noDataMessage.style.display = 'block';
+                return;
+            }
+
+            forms.forEach(form => {
+                const statusBadge = form.isPublished ? '<span class="badge badge-published">Published</span>' : '<span class="badge badge-unpublished">Draft</span>';
+                const createdBy = form.createdBy ? form.createdBy.fullName : 'N/A';
+                const createdAt = new Date(form.createdAt).toLocaleDateString();
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${form.title}</td>
+                    <td>${createdBy}</td>
+                    <td>${statusBadge}</td>
+                    <td>${form.responseCount || 0}</td>
+                    <td>${createdAt}</td>
+                `;
+                formsTableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error loading forms:', error);
+            loadingMessage.textContent = 'Error loading forms: ' + error.message;
+        }
+    }
+    </script>
+</body>
+</html>

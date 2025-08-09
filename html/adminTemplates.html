@@ -1,0 +1,270 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Templates | FormCraft</title>
+    <link rel="stylesheet" href="../css/adminDashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo-container">
+                <img src="https://cdn3.iconfinder.com/data/icons/files-7-1/64/50-512.png" alt="FormCraft Logo">
+                <h1>FormCraft</h1>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="adminDashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="adminTemplates.html" class="nav-item active">
+                    <i class="fas fa-clone"></i>
+                    <span>Templates</span>
+                </a>
+                <a href="adminUsers.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+                <a href="adminForms.html" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>All Forms</span>
+                </a>
+                <a href="adminSubmissions.html" class="nav-item">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Submissions</span>
+                </a>
+            </nav>
+            
+            <div class="user-profile">
+                <div class="profile-image">
+                    <img src="../asserts/profile.png" alt="Admin Profile">
+                </div>
+                <div class="profile-info">
+                    <h3 id="adminName">Admin</h3>
+                    <p>Administrator</p>
+                </div>
+                <button class="profile-menu-btn" id="profileMenuBtn">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <div class="dropdown-content" id="profileDropdown">
+                    <a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1>Templates Management</h1>
+                    <p>Manage default templates for users</p>
+                </div>
+                <button id="addTemplateBtn" class="primary-button">
+                    <i class="fas fa-plus"></i> Add Template
+                </button>
+            </header>
+
+            <div id="templatesGrid" class="card-grid">
+                </div>
+        </main>
+    </div>
+
+    <div id="templateModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Template</h2>
+            <button class="close-modal" id="closeTemplateModal">&times;</button>
+        </div>
+        <form id="templateForm">
+            <div class="form-group">
+                <label for="templateTitle">Template Title</label>
+                <input type="text" id="templateTitle" required>
+            </div>
+            <div class="form-group">
+                <label for="templateDescription">Description</label>
+                <textarea id="templateDescription" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="templateCategory">Category</label>
+                <select id="templateCategory" required>
+                    <option value="Survey">Survey</option>
+                    <option value="Registration">Registration</option>
+                    <option value="Contact">Contact</option>
+                    <option value="Feedback">Feedback</option>
+                    <option value="Job Application">Job Application</option>
+                    <option value="Appointment">Appointment</option>
+                    <option value="Newsletter">Newsletter</option>
+                    <option value="RSVP">RSVP</option>
+                    <option value="Donation">Donation</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="templateImage">Template Image URL</label>
+                <input type="text" id="templateImage" placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="secondary-button" id="cancelTemplate">Cancel</button>
+                <button type="submit" class="primary-button">Create Template</button>
+            </div>
+        </form>
+    </div>
+</div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (!token || !user || user.role !== 'admin') {
+            window.location.href = 'signin.html';
+            return;
+        }
+
+        document.getElementById('adminName').textContent = user.fullName || 'Admin';
+
+        document.getElementById('profileMenuBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-profile')) {
+                document.getElementById('profileDropdown').style.display = 'none';
+            }
+        });
+
+        document.getElementById('logout').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'signin.html';
+        });
+
+        await loadTemplates();
+        
+        document.getElementById('addTemplateBtn').addEventListener('click', showTemplateModal);
+        document.getElementById('closeTemplateModal').addEventListener('click', hideTemplateModal);
+        document.getElementById('cancelTemplate').addEventListener('click', hideTemplateModal);
+        document.getElementById('templateForm').addEventListener('submit', handleTemplateSubmit);
+    });
+
+    async function loadTemplates() {
+        try {
+            const response = await fetch('http://localhost:5000/api/admin/templates', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            if (!response.ok) throw new Error('Failed to load templates');
+            
+            const { data: templates } = await response.json();
+            renderTemplates(templates);
+        } catch (error) {
+            console.error('Error loading templates:', error);
+            const templatesGrid = document.getElementById('templatesGrid');
+            if (templatesGrid) {
+                templatesGrid.innerHTML = `<div class="empty-state">Error loading templates: ${error.message}</div>`;
+            }
+        }
+    }
+        
+    function renderTemplates(templates) {
+        const templatesGrid = document.getElementById('templatesGrid');
+        if (!templatesGrid) return;
+        
+        templatesGrid.innerHTML = '';
+        
+        templates.forEach(template => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="template-image" style="height: 150px; overflow: hidden; margin-bottom: 1rem;">
+                    <img src="${template.templateImage || 'https://placehold.co/300x200?text=Form+Template'}" alt="${template.title}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <h3 class="card-title">${template.title}</h3>
+                <p>${template.description || 'No description'}</p>
+                <div class="card-actions">
+                    <button class="action-btn" onclick="editTemplate('${template._id}')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="action-btn" onclick="deleteTemplate('${template._id}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            `;
+            templatesGrid.appendChild(card);
+        });
+    }
+
+    function showTemplateModal() {
+        const modal = document.getElementById('templateModal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function hideTemplateModal() {
+        const modal = document.getElementById('templateModal');
+        if (modal) modal.style.display = 'none';
+        document.getElementById('templateForm').reset();
+    }
+
+    async function handleTemplateSubmit(e) {
+        e.preventDefault();
+        
+        const templateData = {
+            title: document.getElementById('templateTitle').value,
+            description: document.getElementById('templateDescription').value,
+            templateCategory: document.getElementById('templateCategory').value,
+            templateImage: document.getElementById('templateImage').value || 'https://placehold.co/300x200?text=Form+Template',
+            isTemplate: true
+        };
+        
+        try {
+            const response = await fetch('http://localhost:5000/api/admin/templates', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(templateData)
+            });
+            
+            if (!response.ok) throw new Error('Failed to create template');
+            
+            const { data: template } = await response.json();
+            hideTemplateModal();
+            loadTemplates();
+            
+            window.open(`templateEditor.html?template=${template._id}`, '_blank');
+        } catch (error) {
+            console.error('Error creating template:', error);
+            alert('Error creating template: ' + error.message);
+        }
+    }
+
+    function editTemplate(id) {
+        window.open(`templateEditor.html?template=${id}`, '_blank');
+    }
+
+    async function deleteTemplate(id) {
+        if (confirm('Are you sure you want to delete this template?')) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/admin/templates/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                if (!response.ok) throw new Error('Failed to delete template');
+                loadTemplates();
+            } catch (error) {
+                console.error('Error deleting template:', error);
+                alert('Error deleting template: ' + error.message);
+            }
+        }
+    }
+    </script>
+</body>
+</html>

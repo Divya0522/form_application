@@ -113,7 +113,7 @@ function renderLocalTemplates() {
     templates.forEach((template) => {
         html += `<div class="template-card">
             <div class="template-image">
-                <img src="${template.image}" alt="${template.title}">
+                <img src="${template.templateImage || 'https://placehold.co/300x200?text=Form+Template'}" alt="${template.title}">
                 ${template.templateBadge ? `<span class="template-badge">${template.templateBadge}</span>` : ''}
             </div>
             <div class="template-content">

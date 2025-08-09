@@ -794,7 +794,7 @@ function showAddQuestionPanel() {
   const questionsContainer = document.getElementById('questionsContainer');
   const newQuestionBlock = document.createElement("div");
   newQuestionBlock.className = "questionBlock";
-
+ const requiredStar = field.required ? '<span style="color:red">*</span>' : '';
   let inputHTML = '';
   const fieldId = field.id || field.label.toLowerCase().replace(/\s+/g, '-');
 
@@ -848,14 +848,14 @@ function showAddQuestionPanel() {
   if (isResponseMode) {
     newQuestionBlock.innerHTML = `
       <div id="form-group">
-        <label>${field.label} ${field.required ? '<span style="color:red">*</span>' : ''}</label>
+        <label>${field.label} ${requiredStar}</label>
       </div>
       ${inputHTML}
     `;
   } else {
     newQuestionBlock.innerHTML = `
       <div id="form-group">
-        <label contenteditable="true">${field.label}</label>
+        <label contenteditable="true">${field.label} ${requiredStar}</label>
         <div id="icons">
           <i class="fas fa-plus-circle" onclick="addNewQuestionAfter(event)"></i>
           <i class="fas fa-edit" onclick="editElement(event)"></i>
@@ -1699,7 +1699,10 @@ async function saveForm() {
 
     // Collect all form fields from question blocks
     document.querySelectorAll('.questionBlock').forEach(block => {
-      const label = block.querySelector('label').textContent;
+         const labelElement = block.querySelector('label');
+      if (!labelElement) return;
+     const label = labelElement.textContent.replace(/\s*\*+$/, '').trim(); 
+      
       const input = block.querySelector('input, textarea, select');
       if (!input) return;
 
@@ -1792,8 +1795,9 @@ function getFormStructure() {
     
     const fields = [];
     document.querySelectorAll('.questionBlock').forEach((block) => {
-        const label = block.querySelector('label');
-        if (!label) return;
+         const labelElement = block.querySelector('label');
+    if (!labelElement) return;
+     const label = labelElement.textContent.replace(/\s*\*+$/, '').trim();
 
         // Get the input element to determine type
         const input = block.querySelector('input, textarea, select');

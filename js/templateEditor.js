@@ -146,7 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Header with title and actions
             elementDiv.innerHTML = `
                 <div class="element-header">
-                    <div class="element-title">${element.label}</div>
+                    <div class="element-title">${element.label}
+                     ${element.required ? '<span style="color: red;">*</span>' : ''}</div>
                     <div class="element-actions">
                         <button class="element-action move-up" title="Move Up">
                             <i class="fas fa-arrow-up"></i>
@@ -187,7 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'date':
                 return `
                     <div class="form-group">
-                        <input type="${element.type}" class="form-input" placeholder="${element.placeholder || ''}" disabled>
+                        <input type="${element.type}" class="form-input" placeholder="${element.placeholder || ''}" disabled
+                        ${element.required ? 'required' : ''}
+                        >
                     </div>
                     ${element.description ? `<p class="element-description">${element.description}</p>` : ''}
                 `;
@@ -195,7 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'textarea':
                 return `
                     <div class="form-group">
-                        <textarea class="form-input form-textarea" placeholder="${element.placeholder || ''}" disabled></textarea>
+                        <textarea class="form-input form-textarea" placeholder="${element.placeholder || ''}" disabled
+                        ${element.required ? 'required' : ''}
+                        ></textarea>
                     </div>
                     ${element.description ? `<p class="element-description">${element.description}</p>` : ''}
                 `;
@@ -203,7 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'dropdown':
                 return `
                     <div class="form-group">
-                        <select class="form-input" disabled>
+                        <select class="form-input" disabled
+                        ${element.required ? 'required' : ''}
+                        >
                             ${element.options.map(opt => `<option>${opt}</option>`).join('')}
                         </select>
                     </div>
@@ -217,7 +224,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="form-group">
                         ${element.options.map(opt => `
                             <div class="form-check">
-                                <input type="${element.type}" id="${element.id}-${opt}" disabled>
+                                <input type="${element.type}" id="${element.id}-${opt}" disabled
+                                ${element.required ? 'required' : ''}
+                                >
                                 <label for="${element.id}-${opt}">${opt}</label>
                             </div>
                         `).join('')}
