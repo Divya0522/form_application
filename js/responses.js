@@ -1,213 +1,444 @@
+// // js/responses.js
+
+// document.addEventListener('DOMContentLoaded', async () => {
+//     const user = JSON.parse(localStorage.getItem('user'));
+//     if (!user) {
+//         window.location.href = 'signin.html';
+//         return;
+//     }
+    
+//     document.getElementById('username-display').textContent = user.fullName || 'User';
+
+//     document.getElementById('profileMenuBtn').addEventListener('click', function (e) {
+//         e.stopPropagation();
+//         const dropdown = document.getElementById('profileDropdown');
+//         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+//     });
+
+//     document.addEventListener('click', (e) => {
+//         if (!e.target.closest('.user-profile')) {
+//             document.getElementById('profileDropdown').style.display = 'none';
+//         }
+//     });
+
+//     document.getElementById('logout').addEventListener('click', (e) => {
+//         e.preventDefault();
+//         localStorage.removeItem('token');
+//         localStorage.removeItem('user');
+//         window.location.href = 'signin.html';
+//     });
+    
+//     document.getElementById('editProfile').addEventListener('click', (e) => {
+//         e.preventDefault();
+//         // Placeholder for edit profile functionality
+//         alert('Edit profile functionality is not yet implemented.');
+//     });
+
+//     const urlParams = new URLSearchParams(window.location.search);
+//     const initialFormId = urlParams.get('formId');
+    
+//     // DOM elements
+//     const pageTitle = document.getElementById('pageTitle');
+//     const formsListContainer = document.getElementById('formsListContainer');
+//     const formsList = document.getElementById('formsList');
+//     const responsesContent = document.getElementById('responsesContent');
+//     const totalResponsesEl = document.getElementById('totalResponses');
+//     const lastResponseEl = document.getElementById('lastResponse');
+//     const tableHeaders = document.getElementById('tableHeaders');
+//     const responsesBody = document.getElementById('responsesBody');
+//     const exportBtn = document.getElementById('exportResponses');
+
+//     let allForms = [];
+//     let currentForm = null;
+
+//     await loadUserFormsList();
+
+//     if (initialFormId) {
+//         const form = allForms.find(f => f._id === initialFormId);
+//         if (form) {
+//             await loadResponsesForForm(form);
+//         } else {
+//             pageTitle.textContent = 'Form Not Found';
+//             formsListContainer.style.display = 'block';
+//             responsesContent.style.display = 'none';
+//         }
+//     } else {
+//         formsListContainer.style.display = 'block';
+//         responsesContent.style.display = 'none';
+//     }
+
+//     exportBtn.addEventListener('click', exportToCSV);
+
+//     async function loadUserFormsList() {
+//         try {
+//             const response = await fetch('http://localhost:5000/api/forms', {
+//                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+//             });
+//             if (!response.ok) throw new Error('Failed to load forms');
+            
+//             allForms = await response.json();
+//             renderFormsList(allForms);
+//         } catch (error) {
+//             console.error('Error loading forms:', error);
+//             formsList.innerHTML = `<div class="empty-state">
+//                 <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No Forms">
+//                 <h2>Error Loading Forms</h2>
+//                 <p>Failed to load your forms. Please try again later.</p>
+//             </div>`;
+//         }
+//     }
+
+//     function renderFormsList(forms) {
+//         formsList.innerHTML = '';
+//         if (forms.length === 0) {
+//             formsList.innerHTML = `<div class="empty-state">
+//                 <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No Forms">
+//                 <h2>No Forms Yet</h2>
+//                 <p>Create a form to start collecting responses.</p>
+//             </div>`;
+//         } else {
+//             forms.forEach(form => {
+//                 const card = document.createElement('div');
+//                 card.className = 'form-card';
+//                 card.innerHTML = `
+//                     <div class="form-card-header">
+//                         <i class="fas fa-file-alt"></i>
+//                     </div>
+//                     <div class="form-card-body">
+//                         <h3 class="form-card-title">${form.title}</h3>
+//                         <p class="form-card-description">${form.description || 'No description'}</p>
+//                     </div>
+//                     <div class="form-card-footer">
+//                         <span><i class="fas fa-chart-bar"></i> ${form.responseCount || 0} responses</span>
+//                     </div>
+//                 `;
+//                 card.addEventListener('click', () => loadResponsesForForm(form));
+//                 formsList.appendChild(card);
+//             });
+//         }
+//     }
+
+//     async function loadResponsesForForm(form) {
+//         currentForm = form;
+//         pageTitle.textContent = `${form.title} Responses`;
+//         formsListContainer.style.display = 'none';
+//         responsesContent.style.display = 'block';
+//         exportBtn.style.display = 'inline-flex';
+        
+//         try {
+//             const response = await fetch(`http://localhost:5000/api/responses/${form._id}`, {
+//                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+//             });
+            
+//             if (!response.ok) throw new Error('Failed to load responses');
+            
+//             const { data: responses, formFields, count } = await response.json();
+            
+//             totalResponsesEl.textContent = count;
+//             if (responses.length > 0) {
+//                 lastResponseEl.textContent = new Date(responses[0].createdAt).toLocaleString();
+//             } else {
+//                 lastResponseEl.textContent = '-';
+//             }
+            
+//             renderResponsesTable(responses, formFields);
+//         } catch (error) {
+//             console.error('Error loading responses:', error);
+//             responsesBody.innerHTML = `<tr><td colspan="100%">Error loading responses: ${error.message}</td></tr>`;
+//         }
+//     }
+
+//     function renderResponsesTable(responses, formFields) {
+//         tableHeaders.innerHTML = `<th>#</th><th>Submission Date</th>` +
+//                                 formFields.map(field => `<th>${field.label}</th>`).join('');
+//         responsesBody.innerHTML = '';
+        
+//         if (responses.length === 0) {
+//             responsesBody.innerHTML = `<tr><td colspan="${formFields.length + 2}" style="text-align: center;">No responses yet.</td></tr>`;
+//             return;
+//         }
+
+//         responses.forEach((response, index) => {
+//             const tr = document.createElement('tr');
+//             tr.innerHTML = `<td>${index + 1}</td><td>${new Date(response.createdAt).toLocaleString()}</td>` +
+//                            formFields.map(field => {
+//                                const fieldResponse = response.responses.find(r => r.fieldId === field.id);
+//                                const value = fieldResponse ? fieldResponse.value : '-';
+//                                const displayValue = Array.isArray(value) ? value.join(', ') : value;
+//                                return `<td>${displayValue}</td>`;
+//                            }).join('');
+//             responsesBody.appendChild(tr);
+//         });
+//     }
+
+//     function exportToCSV() {
+//         if (!currentForm || !responsesData || responsesData.length === 0 || !responsesBody.children.length) {
+//             alert('No data to export.');
+//             return;
+//         }
+
+//         const table = document.getElementById('responsesTable');
+//         const rows = table.querySelectorAll('tr');
+//         let csvContent = "data:text/csv;charset=utf-8,";
+        
+//         rows.forEach(row => {
+//             const rowData = Array.from(row.querySelectorAll('th, td')).map(cell => `"${cell.textContent.trim().replace(/"/g, '""')}"`);
+//             csvContent += rowData.join(',') + "\n";
+//         });
+
+//         const encodedUri = encodeURI(csvContent);
+//         const link = document.createElement("a");
+//         link.setAttribute("href", encodedUri);
+//         link.setAttribute("download", `${currentForm.title}_responses.csv`);
+//         document.body.appendChild(link);
+//         link.click();
+//         document.body.removeChild(link);
+//     }
+
+//     // Set up initial active nav item based on URL
+//     const navItems = document.querySelectorAll('.nav-item');
+//     navItems.forEach(item => {
+//         if (item.href.includes(window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1))) {
+//             item.classList.add('active');
+//         } else {
+//             item.classList.remove('active');
+//         }
+//     });
+
+// });
+
+
+// js/responses.js
+
 document.addEventListener('DOMContentLoaded', async () => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
-        window.location.href = 'signin.html'; 
+        window.location.href = 'signin.html';
         return;
     }
+    
+    document.getElementById('username-display').textContent = user.fullName || 'User';
+
+    document.getElementById('profileMenuBtn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        const dropdown = document.getElementById('profileDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.user-profile')) {
+            document.getElementById('profileDropdown').style.display = 'none';
+        }
+    });
+
+    document.getElementById('logout').addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = 'signin.html';
+    });
+    
+    document.getElementById('editProfile').addEventListener('click', (e) => {
+        e.preventDefault();
+        // Placeholder for edit profile functionality
+        alert('Edit profile functionality is not yet implemented.');
+    });
 
     const urlParams = new URLSearchParams(window.location.search);
-    const formId = urlParams.get('formId');
+    const initialFormId = urlParams.get('formId');
     
-    if (!formId) {
-        window.location.href = 'userDashboard.html';
-        return;
-    }
-
     // DOM elements
-    const formTitle = document.getElementById('formTitle');
-    const formDescription = document.getElementById('formDescription');
-    const noResponsesMessage = document.getElementById('noResponsesMessage');
+    const pageTitle = document.getElementById('pageTitle');
+    const formsListContainer = document.getElementById('formsListContainer');
+    const formsList = document.getElementById('formsList');
     const responsesContent = document.getElementById('responsesContent');
-    const totalResponses = document.getElementById('totalResponses');
-    const lastResponse = document.getElementById('lastResponse');
+    const totalResponsesEl = document.getElementById('totalResponses');
+    const lastResponseEl = document.getElementById('lastResponse');
     const tableHeaders = document.getElementById('tableHeaders');
     const responsesBody = document.getElementById('responsesBody');
-    const refreshBtn = document.getElementById('refreshResponses');
     const exportBtn = document.getElementById('exportResponses');
 
-    let formData = null;
-    let responsesData = [];
+    let allForms = [];
+    let currentForm = null;
+    let currentResponses = []; // Store loaded responses
+    let currentFormFields = []; // Store form fields
 
-    // Initialize
-    await loadFormData();
-    await loadResponses();
-    setupEventListeners();
+    await loadUserFormsList();
 
-    async function loadFormData() {
+    if (initialFormId) {
+        const form = allForms.find(f => f._id === initialFormId);
+        if (form) {
+            await loadResponsesForForm(form);
+        } else {
+            pageTitle.textContent = 'Form Not Found';
+            formsListContainer.style.display = 'block';
+            responsesContent.style.display = 'none';
+        }
+    } else {
+        formsListContainer.style.display = 'block';
+        responsesContent.style.display = 'none';
+    }
+
+    exportBtn.addEventListener('click', exportToCSV);
+
+    async function loadUserFormsList() {
         try {
-            const response = await fetch(`http://localhost:5000/api/forms/${formId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
+            const response = await fetch('http://localhost:5000/api/forms', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (!response.ok) throw new Error('Failed to load forms');
+            
+            allForms = await response.json();
+            renderFormsList(allForms);
+        } catch (error) {
+            console.error('Error loading forms:', error);
+            formsList.innerHTML = `<div class="empty-state">
+                <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No Forms">
+                <h2>Error Loading Forms</h2>
+                <p>Failed to load your forms. Please try again later.</p>
+            </div>`;
+        }
+    }
+
+    function renderFormsList(forms) {
+        formsList.innerHTML = '';
+        if (forms.length === 0) {
+            formsList.innerHTML = `<div class="empty-state">
+                <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No Forms">
+                <h2>No Forms Yet</h2>
+                <p>Create a form to start collecting responses.</p>
+            </div>`;
+        } else {
+            forms.forEach(form => {
+                const card = document.createElement('div');
+                card.className = 'form-card';
+                card.innerHTML = `
+                    <div class="form-card-header">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="form-card-body">
+                        <h3 class="form-card-title">${form.title}</h3>
+                        <p class="form-card-description">${form.description || 'No description'}</p>
+                    </div>
+                    <div class="form-card-footer">
+                        <span><i class="fas fa-chart-bar"></i> ${form.responseCount || 0} responses</span>
+                    </div>
+                `;
+                card.addEventListener('click', () => loadResponsesForForm(form));
+                formsList.appendChild(card);
+            });
+        }
+    }
+
+    async function loadResponsesForForm(form) {
+        currentForm = form;
+        pageTitle.textContent = `${form.title} Responses`;
+        formsListContainer.style.display = 'none';
+        responsesContent.style.display = 'block';
+        exportBtn.style.display = 'inline-flex';
+        
+        try {
+            const response = await fetch(`http://localhost:5000/api/responses/${form._id}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
             
-            if (!response.ok) throw new Error('Form not found');
+            if (!response.ok) throw new Error('Failed to load responses');
             
-            const { data } = await response.json();
-            formData = data;
+            const { data: responses, formFields, count } = await response.json();
             
-            formTitle.textContent = `${data.title} - Responses`;
-            if (data.description) {
-                formDescription.textContent = data.description;
+            // Store responses and fields for CSV export
+            currentResponses = responses;
+            currentFormFields = formFields;
+            
+            totalResponsesEl.textContent = count;
+            if (responses.length > 0) {
+                lastResponseEl.textContent = new Date(responses[0].createdAt).toLocaleString();
+            } else {
+                lastResponseEl.textContent = '-';
             }
+            
+            renderResponsesTable(responses, formFields);
         } catch (error) {
-            console.error('Error loading form:', error);
-            alert('Error loading form: ' + error.message);
+            console.error('Error loading responses:', error);
+            responsesBody.innerHTML = `<tr><td colspan="100%">Error loading responses: ${error.message}</td></tr>`;
         }
     }
 
-async function loadResponses() {
-    try {
-        const response = await fetch(`http://localhost:5000/api/responses/${formId}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (!response.ok) throw new Error('Failed to load responses');
-        
-        const { data: responses } = await response.json();
-        responsesData = responses;
+    function renderResponsesTable(responses, formFields) {
+        tableHeaders.innerHTML = `<th>#</th><th>Submission Date</th>` +
+                            formFields.map(field => `<th>${field.label}</th>`).join('');
+        responsesBody.innerHTML = '';
         
         if (responses.length === 0) {
-            noResponsesMessage.style.display = 'flex';
-            responsesContent.style.display = 'none';
+            responsesBody.innerHTML = `<tr><td colspan="${formFields.length + 2}" style="text-align: center;">No responses yet.</td></tr>`;
             return;
         }
-        
-        noResponsesMessage.style.display = 'none';
-        responsesContent.style.display = 'block';
-        
-        // Update summary
-        totalResponses.textContent = responses.length;
-        if (responses.length > 0) {
-            const latest = new Date(responses[0].createdAt);
-            lastResponse.textContent = latest.toLocaleString();
+
+        responses.forEach((response, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${index + 1}</td><td>${new Date(response.createdAt).toLocaleString()}</td>` +
+                          formFields.map(field => {
+                              const fieldResponse = response.responses.find(r => r.fieldId === field.id);
+                              const value = fieldResponse ? fieldResponse.value : '-';
+                              const displayValue = Array.isArray(value) ? value.join(', ') : value;
+                              return `<td>${displayValue}</td>`;
+                          }).join('');
+            responsesBody.appendChild(tr);
+        });
+    }
+
+    function exportToCSV() {
+        if (!currentForm || currentResponses.length === 0) {
+            alert('No data to export.');
+            return;
         }
-        
-        renderResponsesTable(responses);
-    } catch (error) {
-        console.error('Error loading responses:', error);
-        alert('Error loading responses: ' + error.message);
-    }
-}
 
-function renderResponsesTable(responses) {
-    // Clear existing content
-    tableHeaders.innerHTML = '<th>#</th><th>Submission Date</th>';
-    responsesBody.innerHTML = '';
-    
-    // Create header columns for each field
-    formData.fields.forEach(field => {
-        const th = document.createElement('th');
-        th.textContent = field.label;
-        tableHeaders.appendChild(th);
-    });
-    
-    // Add response rows
-    responses.forEach((response, index) => {
-        const tr = document.createElement('tr');
-        
-        // Add index and date cells
-        const indexTd = document.createElement('td');
-        indexTd.textContent = index + 1;
-        tr.appendChild(indexTd);
-        
-        const dateTd = document.createElement('td');
-        const date = new Date(response.createdAt);
-        dateTd.textContent = date.toLocaleString();
-        tr.appendChild(dateTd);
-        
-        // Add response data for each field
-        formData.fields.forEach(field => {
-            const td = document.createElement('td');
-            const fieldResponse = response.responses.find(r => r.fieldId === field.id);
-            
-            if (fieldResponse) {
-                // Handle array values (like from checkboxes)
-                if (Array.isArray(fieldResponse.value)) {
-                    td.textContent = fieldResponse.value.join(', ');
-                } else {
-                    td.textContent = fieldResponse.value;
-                }
-            } else {
-                td.textContent = '-';
-            }
-            tr.appendChild(td);
+        // Create CSV header
+        const headers = ['#', 'Submission Date', ...currentFormFields.map(field => field.label)];
+        let csvContent = headers.map(header => 
+            `"${header.replace(/"/g, '""')}"`
+        ).join(',') + '\n';
+
+        // Add response rows
+        currentResponses.forEach((response, index) => {
+            const rowData = [
+                index + 1,
+                new Date(response.createdAt).toLocaleString(),
+                ...currentFormFields.map(field => {
+                    const fieldResponse = response.responses.find(r => r.fieldId === field.id);
+                    let value = fieldResponse ? fieldResponse.value : '';
+                    
+                    // Handle array values (like checkboxes)
+                    if (Array.isArray(value)) {
+                        value = value.join(', ');
+                    }
+                    
+                    // Escape double quotes and wrap in quotes
+                    return `"${String(value).replace(/"/g, '""')}"`;
+                })
+            ];
+            csvContent += rowData.join(',') + '\n';
         });
-        
-        responsesBody.appendChild(tr);
-    });
-}
 
-
-
-    function setupEventListeners() {
-        refreshBtn.addEventListener('click', async () => {
-            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing';
-            await loadResponses();
-            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
-        });
-        
-        exportBtn.addEventListener('click', () => {
-            exportToCSV();
-        });
+        // Create and trigger download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `${currentForm.title.replace(/\s+/g, '_')}_responses.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
-   function exportToCSV() {
-    if (responsesData.length === 0) {
-        alert('No responses to export');
-        return;
-    }
-    
-    // Get all field IDs from the form definition
-    const fieldIds = formData.fields.map(field => field.id);
-    const fieldLabels = {};
-    formData.fields.forEach(field => {
-        fieldLabels[field.id] = field.label;
+    // Set up initial active nav item based on URL
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        if (item.href.includes(window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1))) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
     });
-    
-    // Create headers
-    const headers = ['#', 'Submission Date', ...fieldIds.map(id => fieldLabels[id] || id)];
-    
-    // Create rows
-    const rows = responsesData.map((response, index) => {
-        const date = new Date(response.createdAt);
-        
-        // Create a map of responses for easy lookup
-        const responseMap = {};
-        response.responses.forEach(item => {
-            responseMap[item.fieldId] = item.value;
-        });
-        
-        const row = [
-            index + 1,
-            date.toLocaleString(),
-            ...fieldIds.map(fieldId => {
-                const value = responseMap[fieldId];
-                if (value !== undefined) {
-                    return Array.isArray(value) ? 
-                        `"${value.join(', ')}"` : 
-                        (value || '-');
-                }
-                return '-';
-            })
-        ];
-        return row.join(',');
-    });
-    
-    // Combine into CSV
-    const csvContent = [headers.join(','), ...rows].join('\n');
-    
-    // Download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${formData.title}_responses_${new Date().toISOString().slice(0,10)}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
 });

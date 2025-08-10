@@ -17,10 +17,9 @@ const router = express.Router();
 const { submitResponse, getFormResponses, getResponseCount,getResponseCounts } = require('../controllers/responseController');
 const { protect } = require('../middlewares/authMiddleware');
 
-// Public submission route
+
 router.post('/:formId', submitResponse);
 
-// Protected routes for form owners
 router.get('/:formId', protect, getFormResponses);
 router.get('/:formId/count', protect, getResponseCount);
 router.get('/:id/counts', protect, getResponseCounts);

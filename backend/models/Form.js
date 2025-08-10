@@ -34,11 +34,11 @@ const formSchema = new mongoose.Schema({
       required: true
     },
     label: String,
-    options: [String],  // For dropdown, radio, checkbox
+    options: [String], 
     required: Boolean,
-    placeholder: String, // For text inputs
-    min: Number,        // For range/number
-    max: Number         // For range/number/rating
+    placeholder: String,
+    min: Number,
+    max: Number
   }],
   isTemplate: {
     type: Boolean,

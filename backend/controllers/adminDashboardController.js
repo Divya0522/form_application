@@ -2,7 +2,6 @@ const User = require('../models/User');
 const Form = require('../models/Form');
 const ErrorHandler = require('../utils/errorHandler');
 
-// Update getDashboardData to include template count
 exports.getDashboardData = async (req, res, next) => {
   try {
     const userCount = await User.countDocuments();
@@ -23,4 +22,3 @@ exports.getDashboardData = async (req, res, next) => {
     next(error);
   }
 };
-// Add other admin dashboard functions as needed

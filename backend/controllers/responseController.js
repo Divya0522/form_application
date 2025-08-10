@@ -7,7 +7,7 @@ exports.submitResponse = async (req, res, next) => {
     const { formId } = req.params;
     const { responses } = req.body;
 
-    // Validate form exists and is published
+
     const form = await Form.findById(formId);
     if (!form || (!form.isPublished && !form.isTemplate)) {
       return next(new ErrorHandler('Form not found or not published', 404));
@@ -52,7 +52,7 @@ exports.getFormResponses = async (req, res, next) => {
     res.status(200).json({
       success: true,
       count: responses.length,
-      formFields: form.fields, // Include form fields in response
+      formFields: form.fields, 
       data: responses
     });
   } catch (error) {
@@ -60,7 +60,7 @@ exports.getFormResponses = async (req, res, next) => {
   }
 };
 
-// Add this new controller method
+
 exports.getResponseCount = async (req, res, next) => {
   try {
     const formId = req.params.formId || req.params.id;
